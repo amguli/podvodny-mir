@@ -7137,9 +7137,9 @@ function gameStep(dt) {
       const lim = ys[limitIdx] - 2.4; if (sub.pos.y < lim) { sub.pos.y = lim; sub.vel.y = Math.max(0, sub.vel.y); if (limitIdx < n - 1 && iy < -.3) toastOnce(t('tLimit'), true); }
       const dv = -sub.vel.y;
       if (dv > 9.6) { stress += dt; hull -= (dv - 9.6) * 2.6 * dt; toastOnce(t('tFast'), true, 3); if (Math.random() < dt * 2.5) AU.creak(); if (stress > 1.1) { brakeT = 2.6; stress = 0; toast(t('tBrake'), true); } } else stress = Math.max(0, stress - dt * .5);
-      bat -= dt * (.26 + (lightOn ? .09 : 0) + (Math.abs(ix) + Math.abs(iy)) * .05);
+      bat -= dt * (.156 + (lightOn ? .054 : 0) + (Math.abs(ix) + Math.abs(iy)) * .03);
     } else {
-      vehStep(bathy, dt, ix, iy, 10, 9.5); bBat -= dt * (.42 + (lightOn ? .08 : 0));
+      vehStep(bathy, dt, ix, iy, 10, 9.5); bBat -= dt * (.25 + (lightOn ? .05 : 0));
       if (bBat <= 0) { bBat = 0; mode = 'return'; returnThen = 'play'; toast(t('tBathyBat'), true, 4200); }
     }
     veh.pos.y = clamp(veh.pos.y, bottom, veh === sub ? Y0 : -1.6);

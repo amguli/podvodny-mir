@@ -1,0 +1,34 @@
+{
+ "beluga": {
+  "f": "sounds/beluga.mp3",
+  "a": "Recorded by Fisheries Research Agency, Japan, with contract support from NOAA to",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Beluga vocalizations.ogg",
+  "page": "https://commons.wikimedia.org/wiki/File:Beluga_vocalizations.ogg"
+ },
+ "sperm_whale": {
+  "f": "sounds/sperm_whale.mp3",
+  "a": "NOAA",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Sperm Whale Slow Clicks.ogg",
+  "page": "https://commons.wikimedia.org/wiki/File:Sperm_Whale_Slow_Clicks.ogg"
+ },
+ "dwarf_minke_whale": {
+  "f": "sounds/dwarf_minke_whale.mp3",
+  "a": "NOAA",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Atlantic minke whale call.ogg",
+  "page": "https://commons.wikimedia.org/wiki/File:Atlantic_minke_whale_call.ogg"
+ },
+ "bearded_seal": {
+  "f": "sounds/bearded_seal.mp3",
+  "a": "Max Eastley",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Svalbard Sample for Wiki.ogg",
+  "page": "https://commons.wikimedia.org/wiki/File:Svalbard_Sample_for_Wiki.ogg"
+ }
+}

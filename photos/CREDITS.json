@@ -1,0 +1,570 @@
+{
+ "black_sea_bottlenose_dolphin": {
+  "f": "photos/black_sea_bottlenose_dolphin.jpg",
+  "a": "NASA",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Tursiops_truncatus_01.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Tursiops_truncatus_01.jpg"
+ },
+ "moon_jellyfish": {
+  "f": "photos/moon_jellyfish.jpg",
+  "a": "Luc Viatour",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Aurelia_aurita_(Cnidaria)_Luc_Viatour.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Aurelia_aurita_(Cnidaria)_Luc_Viatour.jpg"
+ },
+ "black_sea_harbour_porpoise": {
+  "f": "photos/black_sea_harbour_porpoise.jpg",
+  "a": "Ecomare/Salko de Wolf",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Ecomare_-_bruinvis_Michael_in_2015_(bruinvis-michael2015-9313-sw).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Ecomare_-_bruinvis_Michael_in_2015_(bruinvis-michael2015-9313-sw).jpg"
+ },
+ "marbled_rock_crab": {
+  "f": "photos/marbled_rock_crab.jpg",
+  "a": "Charles J. Sharp",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Marbled_crab_(Pachygrapsus_marmoratus)_Butrint.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Marbled_crab_(Pachygrapsus_marmoratus)_Butrint.jpg"
+ },
+ "barrel_jellyfish": {
+  "f": "photos/barrel_jellyfish.jpg",
+  "a": "Ales Kladnik from Ljubljana, Slovenia",
+  "l": "CC BY 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Barrel_jellyfish_(Rhizostoma_pulmo)_(25515589773).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Barrel_jellyfish_(Rhizostoma_pulmo)_(25515589773).jpg"
+ },
+ "warty_comb_jelly": {
+  "f": "photos/warty_comb_jelly.jpg",
+  "a": "Stefan Siebert",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Mnemiopsis_leidyi_2.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Mnemiopsis_leidyi_2.jpg"
+ },
+ "long_snouted_seahorse": {
+  "f": "photos/long_snouted_seahorse.jpg",
+  "a": "FASTILY (TALK)",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "LongSnoutedSeahorse1600ppx.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:LongSnoutedSeahorse1600ppx.jpg"
+ },
+ "veined_rapa_whelk": {
+  "f": "photos/veined_rapa_whelk.jpg",
+  "a": "George Chernilevsky",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Rapana_Black_Sea_2008_G1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Rapana_Black_Sea_2008_G1.jpg"
+ },
+ "european_anchovy": {
+  "f": "photos/european_anchovy.jpg",
+  "a": "Jschop",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Ansjovis.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Ansjovis.jpg"
+ },
+ "black_scorpionfish": {
+  "f": "photos/black_scorpionfish.jpg",
+  "a": "Dmitriy Konstantinov",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Scorpaena-porcus1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Scorpaena-porcus1.jpg"
+ },
+ "red_mullet": {
+  "f": "photos/red_mullet.jpg",
+  "a": "Roberto Pillon",
+  "l": "CC BY 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Mullus_barbatus_Paros_2.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Mullus_barbatus_Paros_2.JPG"
+ },
+ "atlantic_stargazer": {
+  "f": "photos/atlantic_stargazer.jpg",
+  "a": "Yuriy Kvach",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Uranoscopus.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Uranoscopus.jpg"
+ },
+ "beluga_sturgeon": {
+  "f": "photos/beluga_sturgeon.jpg",
+  "a": "Максим Яковлєв",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Білуга_(Huso_huso).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%96%D0%BB%D1%83%D0%B3%D0%B0_(Huso_huso).jpg"
+ },
+ "spiny_dogfish": {
+  "f": "photos/spiny_dogfish.jpg",
+  "a": "Doug Costa, NOAA/SBNMS",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Squalus_acanthias_stellwagen.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Squalus_acanthias_stellwagen.jpg"
+ },
+ "black_sea_turbot": {
+  "f": "photos/black_sea_turbot.jpg",
+  "a": "Kurt Kulac",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Psetta_maeotica_(bothsides).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Psetta_maeotica_(bothsides).jpg"
+ },
+ "thornback_ray": {
+  "f": "photos/thornback_ray.jpg",
+  "a": "Hans Hillewaert",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Raja_clavata_(juv).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Raja_clavata_(juv).jpg"
+ },
+ "green_sea_turtle": {
+  "f": "photos/green_sea_turtle.jpg",
+  "a": "Charles J. Sharp",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Green_sea_turtle_(Chelonia_mydas)_Moorea.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Green_sea_turtle_(Chelonia_mydas)_Moorea.jpg"
+ },
+ "giant_clam": {
+  "f": "photos/giant_clam.jpg",
+  "a": "Charles J. Sharp",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Giant_clam_(Tridacna_gigas)_Michaelmas_Cay.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Giant_clam_(Tridacna_gigas)_Michaelmas_Cay.jpg"
+ },
+ "dwarf_minke_whale": {
+  "f": "photos/dwarf_minke_whale.jpg",
+  "a": "National Marine Sanctuaries",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "SBNMS_-_Minke_Whale_-_Breach_(28670557361).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:SBNMS_-_Minke_Whale_-_Breach_(28670557361).jpg"
+ },
+ "blue_sea_star": {
+  "f": "photos/blue_sea_star.jpg",
+  "a": "dr.scott.mills",
+  "l": "CC BY-SA 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Linckia_laevigata_Tonga.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Linckia_laevigata_Tonga.jpg"
+ },
+ "clown_anemonefish": {
+  "f": "photos/clown_anemonefish.jpg",
+  "a": "CrisisRose",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "A._percula.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:A._percula.jpg"
+ },
+ "cleaner_wrasse": {
+  "f": "photos/cleaner_wrasse.jpg",
+  "a": "Diego Delso",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Lábrido_limpiador_común_(Labroides_dimidiatus),_mar_Rojo,_Egipto,_2023-04-17,_DD_90.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:L%C3%A1brido_limpiador_com%C3%BAn_(Labroides_dimidiatus),_mar_Rojo,_Egipto,_2023-04-17,_DD_90.jpg"
+ },
+ "bumphead_parrotfish": {
+  "f": "photos/bumphead_parrotfish.jpg",
+  "a": "Dirk Froebel",
+  "l": "CC BY 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Bolbometopon_muricatum_290186802.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bolbometopon_muricatum_290186802.jpg"
+ },
+ "christmas_tree_worm": {
+  "f": "photos/christmas_tree_worm.jpg",
+  "a": "(c) portioid, some rights reserved (CC BY-SA)",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Indo-Pacific_Christmas_Tree_Worm_imported_from_iNaturalist_photo_331402951_on_5_March_2024.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Indo-Pacific_Christmas_Tree_Worm_imported_from_iNaturalist_photo_331402951_on_5_March_2024.jpg"
+ },
+ "day_octopus": {
+  "f": "photos/day_octopus.jpg",
+  "a": "Ahmed Abdul Rahman",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Octopus_cyanea_Maldives.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Octopus_cyanea_Maldives.JPG"
+ },
+ "reef_manta_ray": {
+  "f": "photos/reef_manta_ray.jpg",
+  "a": "Shiyam ElkCloner",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG"
+ },
+ "palette_surgeonfish": {
+  "f": "photos/palette_surgeonfish.jpg",
+  "a": "DerHans04",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Paletten-Doktorfisch_Münster.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Paletten-Doktorfisch_M%C3%BCnster.JPG"
+ },
+ "emperor_angelfish": {
+  "f": "photos/emperor_angelfish.jpg",
+  "a": "Francois Libert",
+  "l": "CC BY-SA 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Emperor_Angelfish,_Western_form_-_Pomacanthus_imperator_1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Emperor_Angelfish,_Western_form_-_Pomacanthus_imperator_1.jpg"
+ },
+ "polar_bear": {
+  "f": "photos/polar_bear.jpg",
+  "a": "Alan Wilson",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Polar_Bear_-_Alaska_(cropped).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Polar_Bear_-_Alaska_(cropped).jpg"
+ },
+ "giant_moray": {
+  "f": "photos/giant_moray.jpg",
+  "a": "Nhobgood Nick Hobgood",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Moray_eel_komodo.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Moray_eel_komodo.jpg"
+ },
+ "humphead_wrasse": {
+  "f": "photos/humphead_wrasse.jpg",
+  "a": "Julien Bidet for MDC Seamarc",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Cheilinus_undulatus_Maldives.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Cheilinus_undulatus_Maldives.JPG"
+ },
+ "pygmy_seahorse": {
+  "f": "photos/pygmy_seahorse.jpg",
+  "a": "Jens Petersen",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Hippocampus_bargibanti3.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Hippocampus_bargibanti3.JPG"
+ },
+ "ringed_seal": {
+  "f": "photos/ringed_seal.jpg",
+  "a": "NOAA Seal Survey",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Pusa_hispida_hispida_NOAA_1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Pusa_hispida_hispida_NOAA_1.jpg"
+ },
+ "walrus": {
+  "f": "photos/walrus.jpg",
+  "a": "Nixette",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Walrus_in_the_Russian_Arctic_National_Park,_Novaya_Zemlya_2015-2.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Walrus_in_the_Russian_Arctic_National_Park,_Novaya_Zemlya_2015-2.jpg"
+ },
+ "thick_billed_murre": {
+  "f": "photos/thick_billed_murre.jpg",
+  "a": "AWeith",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "A_Brünnich's_guillemot_(Uria_lomvia)_with_prey.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:A_Br%C3%BCnnich%27s_guillemot_(Uria_lomvia)_with_prey.jpg"
+ },
+ "spiny_lumpsucker": {
+  "f": "photos/spiny_lumpsucker.jpg",
+  "a": "Bloopityboop",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Eumicrotremus_spinosus_VA_1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Eumicrotremus_spinosus_VA_1.jpg"
+ },
+ "sea_butterfly": {
+  "f": "photos/sea_butterfly.jpg",
+  "a": "Photo by Russ Hopcroft, University of Alaska, Fairbanks.",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "LimacinaHelicinaNOAA.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:LimacinaHelicinaNOAA.jpg"
+ },
+ "sea_angel": {
+  "f": "photos/sea_angel.jpg",
+  "a": "Kevin Raskoff, Hidden Ocean 2005 Expedition: NOAA Office of Ocean Exploration.",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Clione_limacina_by_NOAA.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Clione_limacina_by_NOAA.jpg"
+ },
+ "bearded_seal": {
+  "f": "photos/bearded_seal.jpg",
+  "a": "",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Bearded_Seal.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bearded_Seal.jpg"
+ },
+ "lions_mane_jellyfish": {
+  "f": "photos/lions_mane_jellyfish.jpg",
+  "a": "W.carter",
+  "l": "CC0",
+  "src": "Wikimedia Commons",
+  "file": "Lion's_mane_jellyfish_in_Gullmarn_fjord_at_Sämstad_7.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Lion%27s_mane_jellyfish_in_Gullmarn_fjord_at_S%C3%A4mstad_7.jpg"
+ },
+ "beluga": {
+  "f": "photos/beluga.jpg",
+  "a": "Javier Yaya Tur / CIUDAD DE LAS ARTES Y LAS CIENCIAS from Valencia, España",
+  "l": "CC BY 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Oceanogràfic_29102004.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Oceanogr%C3%A0fic_29102004.jpg"
+ },
+ "narwhal": {
+  "f": "photos/narwhal.jpg",
+  "a": "пресс-служба ПАО \"Газпром нефть\"",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Нарвал_в_российской_Арктике.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:%D0%9D%D0%B0%D1%80%D0%B2%D0%B0%D0%BB_%D0%B2_%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9_%D0%90%D1%80%D0%BA%D1%82%D0%B8%D0%BA%D0%B5.jpg"
+ },
+ "bowhead_whale": {
+  "f": "photos/bowhead_whale.jpg",
+  "a": "Vicki Beaver, Alaska Fisheries Science Center, NOAA FIsheries, Marine Mammal Permit#14245",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Bowhead_Whale_NOAA.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bowhead_Whale_NOAA.jpg"
+ },
+ "basket_star": {
+  "f": "photos/basket_star.jpg",
+  "a": "Emőke Dénes",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Tu_-_Gorgonocephalus_arcticus.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Tu_-_Gorgonocephalus_arcticus.jpg"
+ },
+ "greenland_shark": {
+  "f": "photos/greenland_shark.jpg",
+  "a": "NOAA Okeanos Explorer Program",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Somniosus_microcephalus_okeanos.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Somniosus_microcephalus_okeanos.jpg"
+ },
+ "silver_arowana": {
+  "f": "photos/silver_arowana.jpg",
+  "a": "User:Qwertzy2",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Osteoglossum_bicirrhosum.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Osteoglossum_bicirrhosum.JPG"
+ },
+ "victoria_amazonica": {
+  "f": "photos/victoria_amazonica.jpg",
+  "a": "Bilby",
+  "l": "CC BY 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Victoria_amazonica_edit_1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Victoria_amazonica_edit_1.jpg"
+ },
+ "tucuxi": {
+  "f": "photos/tucuxi.jpg",
+  "a": "Allen Sheffield from USA",
+  "l": "CC BY 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Sotalia_fluviatilis_Amazon_River_Dolphin.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Sotalia_fluviatilis_Amazon_River_Dolphin.jpg"
+ },
+ "peacock_bass": {
+  "f": "photos/peacock_bass.jpg",
+  "a": "Tiia Monto",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Cichla_temensis.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Cichla_temensis.jpg"
+ },
+ "red_bellied_piranha": {
+  "f": "photos/red_bellied_piranha.jpg",
+  "a": "H. Zell",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Pygocentrus_nattereri_-_Karlsruhe_Zoo_01.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Pygocentrus_nattereri_-_Karlsruhe_Zoo_01.jpg"
+ },
+ "mata_mata": {
+  "f": "photos/mata_mata.jpg",
+  "a": "J. Patrick Fischer",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "2009_Chelus_fimbriatus.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:2009_Chelus_fimbriatus.JPG"
+ },
+ "tambaqui": {
+  "f": "photos/tambaqui.jpg",
+  "a": "Karg se",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Tambaqui_Brésil_(cropped).JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Tambaqui_Br%C3%A9sil_(cropped).JPG"
+ },
+ "arapaima": {
+  "f": "photos/arapaima.jpg",
+  "a": "Shizhao",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Arapaima_gigas_at_Beijing_aquarium.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Arapaima_gigas_at_Beijing_aquarium.JPG"
+ },
+ "black_caiman": {
+  "f": "photos/black_caiman.jpg",
+  "a": "Rigelus",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Melanosuchus_niger_in_Moscow_zoo.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Melanosuchus_niger_in_Moscow_zoo.jpg"
+ },
+ "boto": {
+  "f": "photos/boto.jpg",
+  "a": "Oceancetaceen",
+  "l": "CC BY-SA 2.0 de",
+  "src": "Wikimedia Commons",
+  "file": "Amazonas-Flussdelfin_Orinoko3.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Amazonas-Flussdelfin_Orinoko3.jpg"
+ },
+ "electric_eel": {
+  "f": "photos/electric_eel.jpg",
+  "a": "KKPCW",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Electrophorus_varii_in_Gifu_World_Fresh_Water_Aquarium_-_2.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Electrophorus_varii_in_Gifu_World_Fresh_Water_Aquarium_-_2.jpg"
+ },
+ "ocellate_stingray": {
+  "f": "photos/ocellate_stingray.jpg",
+  "a": "Raimond Spekking",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Pfauenaugen-Stechrochen_-_Ocellate_river_stingray_-_Potamotrygon_motoro.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Pfauenaugen-Stechrochen_-_Ocellate_river_stingray_-_Potamotrygon_motoro.jpg"
+ },
+ "redtail_catfish": {
+  "f": "photos/redtail_catfish.jpg",
+  "a": "Mattia Nocciola",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Phractocephalus_hemioliopterus_Natural_History_Museum_University_of_Pisa.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Phractocephalus_hemioliopterus_Natural_History_Museum_University_of_Pisa.jpg"
+ },
+ "amazonian_manatee": {
+  "f": "photos/amazonian_manatee.jpg",
+  "a": "Alan Kotok",
+  "l": "CC BY 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Manati_amazonico_en_Iquitos.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Manati_amazonico_en_Iquitos.jpg"
+ },
+ "piraiba": {
+  "f": "photos/piraiba.jpg",
+  "a": "Anthropophoca",
+  "l": "CC0",
+  "src": "Wikimedia Commons",
+  "file": "Piraiba_flip_ed.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Piraiba_flip_ed.jpg"
+ },
+ "mahi_mahi": {
+  "f": "photos/mahi_mahi.jpg",
+  "a": "gendereuphorbia",
+  "l": "CC0",
+  "src": "Wikimedia Commons",
+  "file": "Common_Dolphinfish_Monterey_Bay.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Common_Dolphinfish_Monterey_Bay.jpg"
+ },
+ "spinner_dolphin": {
+  "f": "photos/spinner_dolphin.jpg",
+  "a": "Charles J. Sharp",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Gray's_spinner_dolphin_(Stenella_longirostris_longirostris)_Panglao_(cropped).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Gray%27s_spinner_dolphin_(Stenella_longirostris_longirostris)_Panglao_(cropped).jpg"
+ },
+ "lanternfish": {
+  "f": "photos/lanternfish.jpg",
+  "a": "Emma Kissling",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Myctophum_punctatum1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Myctophum_punctatum1.jpg"
+ },
+ "hatchetfish": {
+  "f": "photos/hatchetfish.jpg",
+  "a": "SEFSC Pascagoula Laboratory; Collection of Brandi Noble, NOAA/NMFS/SEFSC",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "ArgyropelecusAculeatus.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:ArgyropelecusAculeatus.jpg"
+ },
+ "sperm_whale": {
+  "f": "photos/sperm_whale.jpg",
+  "a": "Gabriel Barathieu",
+  "l": "CC BY-SA 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Mother_and_baby_sperm_whale.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Mother_and_baby_sperm_whale.jpg"
+ },
+ "dumbo_octopus": {
+  "f": "photos/dumbo_octopus.jpg",
+  "a": "NOAA Okeanos Explorer",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Dumbo-hires_(cropped).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Dumbo-hires_(cropped).jpg"
+ },
+ "viperfish": {
+  "f": "photos/viperfish.jpg",
+  "a": "Edd48",
+  "l": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Messina_Straits_Chauliodus_sloani.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Messina_Straits_Chauliodus_sloani.jpg"
+ },
+ "crossota_jellyfish": {
+  "f": "photos/crossota_jellyfish.jpg",
+  "a": "Kevin Raskoff. Credit: Hidden Ocean 2005 Expedition: NOAA Office of Ocean Exploration.",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Expl0393_-_Flickr_-_NOAA_Photo_Library.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Expl0393_-_Flickr_-_NOAA_Photo_Library.jpg"
+ },
+ "swimming_sea_cucumber": {
+  "f": "photos/swimming_sea_cucumber.jpg",
+  "a": "Image courtesy of Expedition to the Deep Slope 2007.",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Enypniastes_sp.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Enypniastes_sp.jpg"
+ },
+ "mariana_snailfish": {
+  "f": "photos/mariana_snailfish.jpg",
+  "a": "Gerringer M. E., Linley T. D., Jamieson A. J., Goetze E., Drazen J. C.",
+  "l": "CC BY 3.0",
+  "src": "Wikimedia Commons",
+  "file": "Pseudoliparis_swirei.png",
+  "page": "https://commons.wikimedia.org/wiki/File:Pseudoliparis_swirei.png"
+ },
+ "xenophyophore": {
+  "f": "photos/xenophyophore.jpg",
+  "a": "NOAA",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "XenophyophoreNOAA.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:XenophyophoreNOAA.jpg"
+ }
+}

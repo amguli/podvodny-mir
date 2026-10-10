@@ -6540,7 +6540,7 @@ function onSurfaced() { const ls = lvS(LV.id); hudStatic(); if (!ls.done && must
 function visuals(dt) {
   const v = veh, n = LV.stops.length;
   // camera
-  const tx = v.pos.x * .93, ty = v.pos.y, dist = bathyOut ? 10.5 : 13.5, ns = smooth(-9, -1.4, ty);
+  const tx = v.pos.x + v.face * 1.2, ty = v.pos.y, dist = bathyOut ? 10.5 : 13.5, ns = smooth(-9, -1.4, ty);
   cam.position.x = lerp(cam.position.x, tx, 1 - Math.exp(-dt * 3)); cam.position.y = lerp(cam.position.y, ty + lerp(1.2, 2.6, ns), 1 - Math.exp(-dt * 3.5)); cam.position.z = lerp(cam.position.z, dist, 1 - Math.exp(-dt * 2));
   cam.lookAt(cam.position.x, cam.position.y - lerp(.8, 1.5, ns), 0);
   // water colour, fog, light

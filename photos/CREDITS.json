@@ -497,11 +497,11 @@
  },
  "lanternfish": {
   "f": "photos/lanternfish.jpg",
-  "a": "Emma Kissling",
+  "a": "NOAA/OER",
   "l": "Public domain",
   "src": "Wikimedia Commons",
-  "file": "Myctophum_punctatum1.jpg",
-  "page": "https://commons.wikimedia.org/wiki/File:Myctophum_punctatum1.jpg"
+  "file": "Lanternfish by NOAA.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Lanternfish_by_NOAA.jpg"
  },
  "hatchetfish": {
   "f": "photos/hatchetfish.jpg",
@@ -566,5 +566,77 @@
   "src": "Wikimedia Commons",
   "file": "XenophyophoreNOAA.jpg",
   "page": "https://commons.wikimedia.org/wiki/File:XenophyophoreNOAA.jpg"
+ },
+ "atlantic_poacher": {
+  "f": "photos/atlantic_poacher.jpg",
+  "a": "Георгий Виноградов (Georgy Vinogradov)",
+  "l": "CC BY 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Leptagonus decagonus 435050487.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Leptagonus_decagonus_435050487.jpg"
+ },
+ "brittle_star": {
+  "f": "photos/brittle_star.jpg",
+  "a": "Eric A. Lazo-Wasem Gall L (2019). Invertebrate Zoology Division, Yale Peabody Museum. Yale",
+  "l": "CC0",
+  "src": "Wikimedia Commons",
+  "file": "Ophiura robusta (YPM IZ 002319.EC) 01.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Ophiura_robusta_(YPM_IZ_002319.EC)_01.jpg"
+ },
+ "giant_amphipod": {
+  "f": "photos/giant_amphipod.jpg",
+  "a": "Daiju Azuma",
+  "l": "CC BY-SA 2.5",
+  "src": "Wikimedia Commons",
+  "file": "Hirondellea gigas.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Hirondellea_gigas.jpg"
+ },
+ "glass_sponge": {
+  "f": "photos/glass_sponge.jpg",
+  "a": "NOAA Okeanos Explorer",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Caulophacus sp.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Caulophacus_sp.jpg"
+ },
+ "kelp": {
+  "f": "photos/kelp.jpg",
+  "a": "David Baird",
+  "l": "CC BY-SA 2.0",
+  "src": "Wikimedia Commons",
+  "file": "Kelp forest, Ardtoe - geograph.org.uk - 501243.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Kelp_forest,_Ardtoe_-_geograph.org.uk_-_501243.jpg"
+ },
+ "polar_cod": {
+  "f": "photos/polar_cod.jpg",
+  "a": "Totti",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Boreogadus saida Kaiyukan.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Boreogadus_saida_Kaiyukan.jpg"
+ },
+ "potato_cod": {
+  "f": "photos/potato_cod.jpg",
+  "a": "NasserHalaweh",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Serranidae Epinephelus tukula 1.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Serranidae_Epinephelus_tukula_1.jpg"
+ },
+ "whitetip_reef_shark": {
+  "f": "photos/whitetip_reef_shark.jpg",
+  "a": "Diego Delso",
+  "l": "CC BY-SA 4.0",
+  "src": "Wikimedia Commons",
+  "file": "Tiburón de arrecife de punta blanca (Triaenodon obesus), Nosy Tanikely, Madagascar, 2025-09-19, DD 110.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Tibur%C3%B3n_de_arrecife_de_punta_blanca_(Triaenodon_obesus),_Nosy_Tanikely,_Madagascar,_2025-09-19,_DD_110.jpg"
+ },
+ "yellowfin_tuna": {
+  "f": "photos/yellowfin_tuna.jpg",
+  "a": "OAR/National Undersea Research Program (NURP)",
+  "l": "Public domain",
+  "src": "Wikimedia Commons",
+  "file": "Yellowfin tuna nurp.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Yellowfin_tuna_nurp.jpg"
  }
 }

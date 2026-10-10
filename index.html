@@ -5931,6 +5931,640 @@ SPECIES.xenophyophore = {
   }
 };
 
+/* Phenomena and places: every card that is not an animal gets its own picture in the world.
+   Rule for these: show the idea of the card clearly and truthfully, as a compact object with a clear silhouette.
+   All of them face the camera (+Z) and never turn (behave 'static'); the little motions live in anim(). */
+(function () {
+  'use strict';
+  const P = B.P, PI = Math.PI;
+  const G = () => new THREE.Group();
+  function part(name) { const g = new THREE.Group(); g.name = name; g.userData.rigid = true; return g; }
+  function flagPaint(g, W, H) { g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H / 3 + 1); g.fillStyle = '#0039A6'; g.fillRect(0, H / 3, W, H / 3 + 1); g.fillStyle = '#D52B1E'; g.fillRect(0, H * 2 / 3, W, H / 3 + 1); }
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }
+  /* small unlit sign with a number on it. o: {fg, bg, edge, size, dim, paint(g,W,H)} */
+  function plate(str, w, h, o) {
+    o = o || {};
+    const tw = o.tw || 192, th = Math.max(16, Math.round(tw * h / w));
+    const tex = B.canvasTex(tw, th, (g, W, H) => {
+      g.clearRect(0, 0, W, H);
+      if (o.bg) { g.fillStyle = o.bg; rr(g, 2, 2, W - 4, H - 4, H * .2); g.fill(); if (o.edge) { g.strokeStyle = o.edge; g.lineWidth = Math.max(2, H * .07); g.stroke(); } }
+      if (o.paint) { o.paint(g, W, H); return; }
+      g.fillStyle = o.fg || '#ffffff'; g.font = '700 ' + Math.round(H * (o.size || .7)) + 'px Arial, Helvetica, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(str, W / 2, H * .55, W * .86);
+    });
+    const d = o.dim == null ? .9 : o.dim;
+    return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, color: new THREE.Color(d, d, d) }));
+  }
+  /* the Amazon below 8 m is so murky that fog swallows everything a few metres away: these objects opt out so they can be found */
+  function noFog(g) { g.traverse(n => { if (n.material) n.material.fog = false; }); return g; }
+  function put(m, x, y, z) { m.position.set(x, y, z || 0); return m; }
+  /* flat arrow in the XY plane pointing +X, tail at the origin */
+  function arrow(L, w, color, o) { return B.fin(Object.assign({ pts: [[0, w * .2], [L * .55, w * .2], [L * .55, w * .5], [L, 0], [L * .55, -w * .5], [L * .55, -w * .2], [0, -w * .2]], color, basic: true }, o || {})); }
+  function sun(r, col, n) {
+    const g = G(); g.add(B.ball({ r, color: col, emissive: col, emissiveIntensity: .8, segs: 14, rings: 10 }));
+    n = n || 10; for (let i = 0; i < n; i++) { const a = i / n * PI * 2; g.add(B.cone({ r: r * .2, h: r * .6, at: [Math.cos(a) * r * 1.5, Math.sin(a) * r * 1.5, 0], rot: [0, 0, a - PI / 2], color: col, emissive: col, emissiveIntensity: .8, segs: 5 })); }
+    g.add(B.glow({ r: r * 2.4, color: col, intensity: .45 })); return g;
+  }
+  function rock(r0, col, seed, o) {
+    const g = new THREE.SphereGeometry(r0, 9, 7), p = g.attributes.position, s0 = (seed || 1) * 1.7;
+    for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const k = 1 + .18 * Math.sin(x * 2.1 / r0 + s0) * Math.cos(z * 2.7 / r0 + s0 * .6) + .12 * Math.sin(y * 3.3 / r0 + s0 * 1.3 + x / r0); p.setXYZ(i, x * k, y * k, z * k); }
+    g.computeVertexNormals(); return new THREE.Mesh(g, B.mat(Object.assign({ color: col, shininess: 2, specular: '#000000', flat: true }, o || {})));
+  }
+  /* a floating picture-plaque for surface places: a round tile, tilted towards the child, with a painted top */
+  function tile(k, paint, rim) {
+    const g = G();
+    const top = new THREE.Mesh(new THREE.CircleGeometry(.5, 44), B.mat({ paint, texW: 512, texH: 512, shininess: 4, specular: '#000000', emissive: '#ffffff', emissiveIntensity: .12, emissiveMap: true }));
+    top.scale.set(1, k, 1); top.rotation.x = -PI / 2; top.position.y = .03; g.add(top);
+    const bot = new THREE.Mesh(new THREE.CircleGeometry(.5, 44), B.mat({ color: '#123049', shininess: 5 })); bot.scale.set(1, k, 1); bot.rotation.x = PI / 2; bot.position.y = -.03; g.add(bot);
+    g.add(B.cyl({ r: .5, h: .06, open: true, segs: 44, scale: [1, 1, k], color: rim, side: 'double' }));
+    const t = new THREE.Mesh(new THREE.TorusGeometry(.5, .022, 8, 44), B.mat({ color: rim, shininess: 50 })); t.scale.set(1, k, 1); t.rotation.x = PI / 2; t.position.y = .02; g.add(t);
+    return g;
+  }
+  function plinth(x, z, w, year, h) {
+    const g = G(); h = h || .1;
+    g.add(B.box({ size: [w, h, .17], at: [0, h / 2, 0], color: '#4b5158', shininess: 12, emissive: '#15191d', emissiveIntensity: .6 }));
+    g.add(B.box({ size: [w + .03, .016, .2], at: [0, .008, 0], color: '#3a4046', shininess: 8 }));
+    if (year) g.add(put(plate(year, Math.min(w * .82, .17), h * .62, { bg: '#1b232b', edge: '#d9b45a', fg: '#ffd978', size: .74 }), 0, h * .52, .0865));
+    g.position.set(x, 0, z); return g;
+  }
+  function mud(rx, rz, col) { return B.ball({ r: 1, scale: [rx, .03, rz], at: [0, .002, 0], color: col || '#b3a998', shininess: 2, specular: '#000000', emissive: '#2a2721', emissiveIntensity: .4, segs: 18, rings: 6 }); }
+
+  /* small copies of the game's own vehicles (props.js is not loaded yet when this file runs) */
+  function miniSub(L) {
+    const g = G();
+    g.add(B.body({ len: L, segs: 18, rad: 12, stations: [[0, .02, .02, .02], [.05, .07, .07, .07], [.15, .11, .11, .11], [.6, .11, .11, .11], [.85, .06, .06, .06], [1, .02, .02, .02]], shininess: 60, specular: '#8a7a50', emissive: '#4a3600', emissiveIntensity: .55,
+      paint(c, W, H) { P.grad(c, [[0, '#ffd75e'], [.4, '#ffc93c'], [.62, '#f4b21f'], [.63, '#f7f4ea'], [.8, '#f7f4ea'], [.81, '#12395c'], [1, '#0c2a44']]); } }));
+    g.add(B.body({ len: L * .25, segs: 8, rad: 10, sq: 2.6, stations: [[0, .5, 0, .06], [.12, .56, 0, .15], [.5, .58, 0, .17], [.88, .54, 0, .12], [1, .48, 0, .04]], at: [L * .07, L * .1, 0], color: '#ffc93c', shininess: 50, emissive: '#4a3600', emissiveIntensity: .55 }));
+    [1, -1].forEach(s => { const f = new THREE.Mesh(new THREE.PlaneGeometry(L * .12, L * .075), new THREE.MeshBasicMaterial({ map: B.canvasTex(48, 32, flagPaint) })); f.position.set(L * .07, L * .185, s * L * .044); if (s < 0) f.rotation.y = PI; g.add(f);
+      [-.24, -.1, .25].forEach(x => g.add(B.cyl({ r: L * .024, h: L * .01, at: [L * x, L * .028, s * L * .108], rot: [PI / 2, 0, 0], color: '#15344f', emissive: '#ffe9a0', emissiveIntensity: .9, segs: 10 }))); });
+    g.add(B.ball({ r: L * .085, at: [L * .4, L * .004, 0], scale: [1.1, 1, 1], color: '#9fe6ff', opacity: .55, shininess: 120, specular: '#ffffff', emissive: '#2a6a80', emissiveIntensity: .5, segs: 12, rings: 8 }));
+    const finM = B.mat({ color: '#f08a24', shininess: 40, side: 'double', emissive: '#4a2400', emissiveIntensity: .5 });
+    g.add(B.fin({ pts: [[.06 * L, 0], [.01 * L, .125 * L], [-.06 * L, .125 * L], [-.05 * L, 0]], at: [-.4 * L, .02 * L, 0], mat: finM }));
+    g.add(B.fin({ pts: [[.06 * L, 0], [.01 * L, -.1 * L], [-.06 * L, -.1 * L], [-.05 * L, 0]], at: [-.4 * L, -.02 * L, 0], mat: finM }));
+    g.add(B.fin({ pts: [[.06 * L, 0], [.01 * L, .14 * L], [-.06 * L, .14 * L], [-.05 * L, 0]], at: [-.4 * L, 0, .016 * L], rot: [PI / 2, 0, 0], mat: finM, mirror: true }));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(L * .09, L * .009, 6, 16), finM); ring.rotation.y = PI / 2; ring.position.x = -.51 * L; g.add(ring);
+    return g;
+  }
+  function miniBathy(L) {
+    const g = G();
+    g.add(B.body({ len: L, segs: 14, rad: 12, stations: [[0, .02, .02, .02], [.08, .11, .11, .11], [.3, .14, .14, .14], [.7, .14, .14, .14], [.92, .1, .1, .1], [1, .02, .02, .02]], at: [0, L * .27, 0], shininess: 60, emissive: '#5c5c5c', emissiveIntensity: .8,
+      paint(c, W, H) { P.fill(c, '#F2F2F2'); c.fillStyle = '#F26B1D'; c.fillRect(0, H * .38, W, H * .2); } }));
+    g.add(B.ball({ r: L * .24, at: [L * .08, -L * .03, 0], color: '#F2F2F2', shininess: 80, emissive: '#5c5c5c', emissiveIntensity: .8, segs: 14, rings: 10 }));
+    g.add(B.cyl({ r: L * .125, h: L * .04, at: [L * .305, -L * .03, 0], rot: [0, 0, PI / 2], color: '#F26B1D', segs: 12 }));
+    g.add(B.cyl({ r: L * .09, h: L * .05, at: [L * .31, -L * .03, 0], rot: [0, 0, PI / 2], color: '#12324a', emissive: '#ffe9a0', emissiveIntensity: .9, segs: 12 }));
+    g.add(B.cyl({ r: L * .09, h: L * .03, at: [L * .07, -L * .02, L * .235], rot: [PI / 2, 0, 0], color: '#12324a', emissive: '#ffe9a0', emissiveIntensity: .8, segs: 12 }));
+    g.add(B.tube({ path: [[L * .2, L * .08, L * .13], [L * .37, L * .13, L * .17], [L * .47, L * .08, L * .17]], r: L * .014, color: '#55616b', rad: 5, segs: 6 }));
+    g.add(B.ball({ r: L * .034, at: [L * .48, L * .07, L * .17], color: '#fff6c8', emissive: '#fff2a8', emissiveIntensity: 1, segs: 8, rings: 6 }));
+    g.add(B.glow({ r: L * .16, color: '#fff2a8', intensity: .55, at: [L * .5, L * .07, L * .17] }));
+    [1, -1].forEach(s => g.add(B.tube({ path: [[L * .33, -L * .28, s * L * .17], [0, -L * .33, s * L * .19], [-L * .3, -L * .28, s * L * .17]], r: L * .017, color: '#55616b', rad: 5, segs: 6 })));
+    return g;
+  }
+
+  /* ================= BLACK SEA ================= */
+
+  /* The dead deep: nothing but a lone oxygen probe on its cable, reading O2 = 0. Deliberately bare. */
+  SPECIES.dead_zone = {
+    behave: 'static', zone: 'mid', count: 1, speed: 0, scale: 3.4, arrowUp: .7,
+    build(B) {
+      const root = G(), g = part('in'); root.add(g);
+      const steel = B.mat({ color: '#8c979f', shininess: 60, specular: '#cfe0ea', emissive: '#4a5a66', emissiveIntensity: .8 });
+      const dark = B.mat({ color: '#3d474f', shininess: 30, emissive: '#232d35', emissiveIntensity: .8 });
+      g.add(B.cyl({ r: .006, h: .44, at: [0, .34, 0], mat: dark, segs: 6 }));                       // the cable goes up into the dark
+      g.add(B.cone({ r: .035, h: .07, at: [0, .105, 0], mat: dark, segs: 8 }));
+      [.07, -.14, -.36].forEach(y => { const t = new THREE.Mesh(new THREE.TorusGeometry(.17, .012, 6, 22), steel); t.rotation.x = PI / 2; t.position.y = y; g.add(t); });
+      for (let i = 0; i < 6; i++) { const a = i / 6 * PI * 2 + PI / 6; g.add(B.cyl({ r: .009, h: .43, at: [Math.cos(a) * .17, -.145, Math.sin(a) * .17], mat: steel, segs: 6 })); }
+      g.add(B.cyl({ r: .06, h: .36, at: [0, -.15, 0], mat: dark, segs: 10 }));
+      for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2 + .39; g.add(B.cyl({ r: .026, h: .25, at: [Math.cos(a) * .115, -.12, Math.sin(a) * .115], color: '#aab4bb', shininess: 40, emissive: '#4a5a66', emissiveIntensity: .8, segs: 8 })); }
+      g.add(B.cyl({ r1: .06, r2: .03, h: .08, at: [0, -.4, 0], mat: steel, segs: 10 }));
+      // read-out: O2 = 0
+      g.add(B.box({ size: [.23, .125, .03], at: [0, -.035, .19], mat: dark }));
+      g.add(put(plate('', .2, .1, { bg: '#0a0d10', edge: '#59636b', dim: 1, paint(c, W, H) { c.fillStyle = '#ff4b3e'; c.textBaseline = 'middle'; c.textAlign = 'left'; c.font = '700 ' + Math.round(H * .62) + 'px Arial, Helvetica, sans-serif'; c.fillText('O', W * .1, H * .52); c.font = '700 ' + Math.round(H * .36) + 'px Arial, Helvetica, sans-serif'; c.fillText('2', W * .355, H * .68); c.font = '700 ' + Math.round(H * .62) + 'px Arial, Helvetica, sans-serif'; c.fillText('0', W * .66, H * .52); c.fillRect(W * .48, H * .4, W * .1, H * .06); c.fillRect(W * .48, H * .56, W * .1, H * .06); } }), 0, -.035, .2065));
+      const lb = B.ball({ r: .03, at: [0, .075, .19], color: '#ff3b30', emissive: '#ff2a20', emissiveIntensity: 1, segs: 10, rings: 8, name: 'lampB' }); lb.userData.ownMat = true; g.add(lb);
+      g.add(B.glow({ r: .13, color: '#ff3b30', intensity: .8, at: [0, .075, .2], name: 'lamp' }));
+      return root;
+    },
+    anim(g, t) {
+      const p = B.parts(g), k = (t % 2.4) < .4 ? 1 : .12;
+      p.in.rotation.y = Math.sin(t * .35) * .28; p.in.position.y = Math.sin(t * .5) * .02;
+      p.lamp.material.opacity = .85 * k; p.lampB.material.emissiveIntensity = .25 + .75 * k;
+    }
+  };
+
+  /* ================= CORAL REEF ================= */
+
+  /* Great Barrier Reef as seen from the air: a chain of many turquoise reefs along the coast of Australia. */
+  SPECIES.great_barrier_reef = {
+    behave: 'static', zone: 'surface', count: 1, speed: 0, scale: 4.6, arrowUp: .62,
+    build(B) {
+      const root = G(), g = part('in'); root.add(g);
+      const K = .66, tl = tile(K, (c, W, H) => {
+        const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#1563a0'); gr.addColorStop(.3, '#0e4f8a'); gr.addColorStop(1, '#0B3C6E'); c.fillStyle = gr; c.fillRect(0, 0, W, H);
+        // the coast of Australia along the far edge: beach, then green land
+        const coast = (off, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(0, 0); c.lineTo(W, 0); for (let x = W; x >= 0; x -= 8) c.lineTo(x, H * (off + .035 * Math.sin(x * .021) + .02 * Math.sin(x * .06 + 1) + .1 * Math.pow(Math.abs(x / W - .5) * 2, 2))); c.closePath(); c.fill(); };
+        coast(.2, '#7fd2d6'); coast(.185, '#F2E6C4'); coast(.165, '#6a9a3e'); coast(.13, '#4f7f33');
+        c.fillStyle = 'rgba(255,255,255,.1)'; const r = B.rng(4); for (let i = 0; i < 60; i++) c.fillRect(r() * W, H * (.3 + r() * .7), 8 + r() * 18, 2);
+      }, '#f4efe0');
+      const r = B.rng(11);
+      const reefM = B.mat({ texW: 128, texH: 128, shininess: 30, emissive: '#0d5a58', emissiveIntensity: .35, paint(c, W, H) { P.fill(c, '#3FD0C9'); P.spots(c, { n: 26, color: '#6B5B3A', alpha: .6, r0: .03, r1: .08, seed: 5 }); P.spots(c, { n: 14, color: '#A8E6DF', alpha: .8, r0: .04, r1: .1, seed: 8 }); P.spots(c, { n: 16, color: '#ff8fa3', alpha: .85, r0: .015, r1: .03, seed: 2 }); P.spots(c, { n: 10, color: '#ffc04d', alpha: .85, r0: .015, r1: .03, seed: 3 }); } });
+      const surf = B.mat({ color: '#ffffff', shininess: 10, emissive: '#666666', emissiveIntensity: .4 });
+      const N = 15;
+      for (let i = 0; i < N; i++) {
+        const u = .1 + .8 * i / (N - 1), cy = .5 + .09 * Math.sin(u * 4.2 + .5) + (r() - .5) * .06 + (i % 2) * .2;
+        const x = u - .5, z = (cy - .5) * K, rx = .036 + r() * .034, rz = .024 + r() * .02, ry = (r() - .5) * 1.2;
+        const s = B.ball({ r: 1, scale: [rx * 1.22, .012, rz * 1.3], at: [x, .034, z], rot: [0, ry, 0], mat: surf, segs: 10, rings: 5 }); tl.add(s);
+        tl.add(B.ball({ r: 1, scale: [rx, .026, rz], at: [x, .036, z - .003], rot: [0, ry, 0], mat: reefM, segs: 10, rings: 5 }));
+        if (i % 3 === 1) { tl.add(B.ball({ r: 1, scale: [rx * .36, .02, rz * .4], at: [x, .056, z - .003], color: '#F2E6C4', segs: 7, rings: 4 })); tl.add(B.ball({ r: .009, at: [x, .076, z - .003], color: '#3f8a3a', segs: 6, rings: 4 })); }
+      }
+      tl.rotation.x = 1.12; tl.position.y = .22; g.add(tl);
+      return root;
+    },
+    anim(g, t) { const p = B.parts(g); p.in.rotation.z = Math.sin(t * .9) * .035; p.in.position.y = Math.sin(t * 1.1) * .015; }
+  };
+
+  /* ================= ARCTIC ================= */
+
+  /* Polar day and polar night: one sky, split in two. Left: the low sun that slides along the horizon and never sets. Right: stars. */
+  SPECIES.polar_day_night = {
+    behave: 'static', zone: 'surface', count: 1, speed: 0, scale: 3.8, arrowUp: .9,
+    build(B) {
+      const root = G(), g = part('in'); root.add(g);
+      const ice = B.mat({ color: '#eef8fc', shininess: 30, specular: '#bfe6f5', emissive: '#7fbcd0', emissiveIntensity: .25, flat: true });
+      { const r = B.rng(6), pts = []; for (let i = 0; i < 9; i++) { const a = i / 9 * PI * 2, rad = .42 * (.8 + r() * .3); pts.push(new THREE.Vector2(Math.cos(a) * rad, Math.sin(a) * rad * .62)); }
+        const fg = new THREE.ExtrudeGeometry(new THREE.Shape(pts), { depth: .12, bevelEnabled: true, bevelSize: .02, bevelThickness: .02, bevelSegments: 1, steps: 1 }); fg.rotateX(PI / 2); fg.translate(0, .06, 0); g.add(new THREE.Mesh(fg, ice)); }
+      g.add(B.cone({ r: .15, h: .16, at: [0, .13, 0], mat: ice, segs: 6 }));
+      const R = .33, cy = .5;
+      const face = new THREE.Mesh(new THREE.CircleGeometry(R, 40), new THREE.MeshBasicMaterial({ map: B.canvasTex(256, 256, (c, W, H) => {
+        const hz = H * .64;
+        c.save(); c.beginPath(); c.rect(0, 0, W / 2, H); c.clip();                                   // polar day
+        let gr = c.createLinearGradient(0, 0, 0, hz); gr.addColorStop(0, '#9cc6ea'); gr.addColorStop(.55, '#BFD9EE'); gr.addColorStop(1, '#F6D5B5'); c.fillStyle = gr; c.fillRect(0, 0, W, hz);
+        c.fillStyle = '#f7fbfd'; c.fillRect(0, hz, W, H - hz); c.fillStyle = '#b9d3ea'; [[.2, .74], [.33, .83], [.1, .9]].forEach(q => { c.beginPath(); c.ellipse(q[0] * W, q[1] * H, W * .11, H * .018, 0, 0, 7); c.fill(); });
+        c.fillStyle = '#eaf4fa'; c.beginPath(); c.moveTo(W * .06, hz); c.lineTo(W * .16, hz - H * .07); c.lineTo(W * .25, hz); c.fill();
+        c.fillStyle = 'rgba(255,214,92,.9)'; for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(W * (.1 + i * .05), hz - H * .075 - Math.sin(i / 8 * PI) * H * .015, 3, 0, 7); c.fill(); }   // the sun's level track
+        c.restore();
+        c.save(); c.beginPath(); c.rect(W / 2, 0, W / 2, H); c.clip();                                // polar night
+        gr = c.createLinearGradient(0, 0, 0, hz); gr.addColorStop(0, '#070f26'); gr.addColorStop(.7, '#0B1633'); gr.addColorStop(1, '#27407a'); c.fillStyle = gr; c.fillRect(0, 0, W, hz);
+        c.fillStyle = '#3C4F78'; c.fillRect(0, hz, W, H - hz); c.fillStyle = '#2c3b5e'; [[.72, .76], [.85, .86]].forEach(q => { c.beginPath(); c.ellipse(q[0] * W, q[1] * H, W * .11, H * .018, 0, 0, 7); c.fill(); });
+        c.fillStyle = '#46597f'; c.beginPath(); c.moveTo(W * .74, hz); c.lineTo(W * .84, hz - H * .07); c.lineTo(W * .93, hz); c.fill();
+        const r = B.rng(9); c.fillStyle = '#ffffff'; for (let i = 0; i < 26; i++) { c.globalAlpha = .5 + r() * .5; c.beginPath(); c.arc(W * (.52 + r() * .46), H * (.05 + r() * .5), .8 + r() * 1.6, 0, 7); c.fill(); }
+        c.restore(); c.fillStyle = '#ffffff'; c.fillRect(W / 2 - 2, 0, 4, H);
+      }) }));
+      face.position.set(0, cy, .012); g.add(face);
+      g.add(B.cyl({ r: R, h: .022, at: [0, cy, 0], rot: [PI / 2, 0, 0], color: '#22335e', segs: 40 }));
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(R, .022, 8, 44), B.mat({ color: '#f6ead0', shininess: 60 })); rim.position.set(0, cy, 0); g.add(rim);
+      const s = sun(.055, '#ffd24a', 10); s.name = 'sun'; s.userData.rigid = true; s.position.set(-.18, cy - .05, .05); g.add(s);
+      // crescent moon and a few stars on the night side
+      const mo = []; for (let i = 0; i <= 12; i++) { const a = -PI / 2 + i / 12 * PI; mo.push([Math.cos(a) * .06, Math.sin(a) * .06]); } for (let i = 12; i >= 0; i--) { const a = -PI / 2 + i / 12 * PI; mo.push([Math.cos(a) * .034 - .012, Math.sin(a) * .06]); }
+      g.add(B.fin({ pts: mo, at: [.15, cy + .12, .03], rot: [0, 0, -.4], color: '#fff3c4', basic: true }));
+      const st = part('stars'); [[.07, .2], [.24, .03], [.1, .02], [.2, .2], [.05, .1]].forEach(q => st.add(B.glow({ r: .022, color: '#ffffff', intensity: .9, at: [q[0], cy + q[1], .035] }))); g.add(st);
+      return root;
+    },
+    anim(g, t) {
+      const p = B.parts(g); p.in.rotation.z = Math.sin(t * .8) * .025;
+      p.sun.position.x = -.175 + Math.sin(t * .45) * .1; p.sun.rotation.z = t * .3;      // slides sideways along the horizon, never dips
+      p.stars.children.forEach((s, i) => { s.material.opacity = .45 + .45 * Math.sin(t * 2.2 + i * 1.9); });
+    }
+  };
+
+  /* Why ice floats: a block of ice in the water. Only about a tenth shows above the waterline (1 part up, 9 parts down). */
+  SPECIES.floating_ice = {
+    behave: 'static', zone: 'top', count: 1, speed: 0, scale: 4, arrowUp: .62,
+    build(B) {
+      const root = G(), yw = .36;
+      const water = new THREE.Mesh(new THREE.CircleGeometry(.52, 36), B.mat({ color: '#2f9fc4', opacity: .5, side: 'double', shininess: 100, specular: '#ffffff', emissive: '#0e4a66', emissiveIntensity: .4 }));
+      water.rotation.x = -PI / 2; water.position.y = yw; root.add(water);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.52, .012, 6, 40), B.mat({ color: '#dff6ff', emissive: '#5aa9c4', emissiveIntensity: .5 })); ring.rotation.x = PI / 2; ring.position.y = yw; root.add(ring);
+      const blk = part('ice');
+      const sg = new THREE.SphereGeometry(1, 9, 8), sp = sg.attributes.position;
+      for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), y = sp.getY(i), z = sp.getZ(i), k = 1 + .13 * Math.sin(x * 4.1 + y * 2.3 + 1) + .1 * Math.cos(z * 5.2 + x * 1.7) + .06 * Math.sin(y * 7); const e = .62; sp.setXYZ(i, Math.sign(x) * Math.pow(Math.abs(x), e) * k * .29, y * .45, Math.sign(z) * Math.pow(Math.abs(z), e) * k * .24); }
+      sg.computeVertexNormals();
+      blk.add(new THREE.Mesh(sg, B.mat({ texW: 32, texH: 256, flat: true, shininess: 60, specular: '#dff6ff', emissive: '#7fbcd0', emissiveIntensity: .3,
+        paint(c, W, H) { const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#ffffff'); gr.addColorStop(.2, '#F5FAFC'); gr.addColorStop(.215, '#b5e6ee'); gr.addColorStop(.5, '#8ccbd8'); gr.addColorStop(1, '#4E7D93'); c.fillStyle = gr; c.fillRect(0, 0, W, H); } })));
+      // a few bubbles caught under the block
+      [[-.1, -.5, .12], [.08, -.53, .05], [.16, -.44, .14]].forEach(q => blk.add(B.ball({ r: .016, at: q, color: '#e8fbff', opacity: .7, emissive: '#9fd8e0', emissiveIntensity: .5, segs: 6, rings: 5 })));
+      root.add(blk);
+      // ruler: ten equal parts, one above the water, nine below
+      const top = .45, seg = .09;
+      for (let i = 0; i < 10; i++) root.add(B.box({ size: [.05, seg - .012, .03], at: [.44, top - seg * (i + .5), .1], color: i === 0 ? '#ffffff' : (i % 2 ? '#2f7fb0' : '#63b4dc'), emissive: i === 0 ? '#888888' : '#1c5878', emissiveIntensity: .5 }));
+      root.add(put(plate('1', .1, .1, { fg: '#ffffff', size: .95, tw: 64 }), .54, top - seg * .5 + .01, .1));
+      root.add(put(plate('9', .12, .13, { fg: '#bfe9ff', size: .95, tw: 64 }), .55, top - seg * 5.5, .1));
+      return root;
+    },
+    anim(g, t) { const p = B.parts(g); p.ice.position.y = Math.sin(t * 1.1) * .012; p.ice.rotation.z = Math.sin(t * .7) * .035; }
+  };
+
+  /* ================= AMAZON ================= */
+
+  /* Meeting of Waters: dark Rio Negro on the left, pale Solimoes on the right, a seam of swirls, and the pale side running faster. */
+  SPECIES.meeting_of_waters = {
+    behave: 'static', zone: 'surface', count: 1, speed: 0, scale: 4.4, arrowUp: .8,
+    build(B) {
+      const root = G(), g = part('in'); root.add(g);
+      const D = '#2a1a10', L = '#b9925a';
+      const tl = tile(1, (c, W, H) => {
+        const seam = y => W / 2 + Math.sin(y * .028) * 12 + Math.sin(y * .071 + 1) * 6;
+        c.fillStyle = L; c.fillRect(0, 0, W, H);
+        c.fillStyle = D; c.beginPath(); c.moveTo(0, 0); for (let y = 0; y <= H; y += 6) c.lineTo(seam(y), y); c.lineTo(0, H); c.closePath(); c.fill();
+        // swirls where pale water curls into dark and dark into pale, like milk in coffee
+        for (let i = 0; i < 6; i++) { const y = H * (.12 + i * .15), x = seam(y), into = i % 2 ? 1 : -1, col = into > 0 ? D : L;
+          c.strokeStyle = col; c.lineCap = 'round'; c.lineWidth = 11; c.beginPath(); for (let k = 0; k <= 26; k++) { const a = k * .33, rad = 4 + k * 1.25; const px = x + into * (18 + Math.cos(a) * rad * .9), py = y + Math.sin(a) * rad * .8; if (k) c.lineTo(px, py); else c.moveTo(px, py); } c.stroke(); }
+        // ripples on the fast pale side, smooth dark side
+        c.strokeStyle = 'rgba(255,240,205,.5)'; c.lineWidth = 3; const r = B.rng(3); for (let i = 0; i < 26; i++) { const x = W * (.62 + r() * .34), y = r() * H; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 8, y + 5, x + 16, y); c.stroke(); }
+        c.strokeStyle = 'rgba(120,80,45,.35)'; c.lineWidth = 2; for (let i = 0; i < 7; i++) { const x = W * (.06 + r() * .3), y = r() * H; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 26, y); c.stroke(); }
+      }, '#efe6cf');
+      // flow marks: three quick ones on the pale side, one slow one on the dark side
+      const chev = (col) => B.fin({ pts: [[-.07, .06], [0, 0], [.07, .06], [.07, .1], [0, .04], [-.07, .1]], rot: [-PI / 2, 0, 0], color: col, basic: true, opacity: .95 });
+      const fast = part('fast'); for (let i = 0; i < 3; i++) { const m = chev('#fff3d4'); m.position.set(.24, .036, 0); m.userData.k = i / 3; fast.add(m); } tl.add(fast);
+      const slow = part('slow'); { const m = chev('#c58f55'); m.position.set(-.25, .036, 0); m.userData.k = 0; slow.add(m); } tl.add(slow);
+      tl.rotation.x = 1.02; tl.position.y = .3; g.add(tl);
+      return root;
+    },
+    anim(g, t) {
+      const p = B.parts(g); p.in.rotation.z = Math.sin(t * .9) * .03; p.in.position.y = Math.sin(t * 1.1) * .015;
+      const run = (grp, v) => grp.children.forEach(m => { const u = ((t * v + m.userData.k) % 1 + 1) % 1; m.position.z = -.34 + u * .6; m.material.opacity = Math.min(1, Math.sin(u * PI) * 2.2) * .95; });
+      run(p.fast, .45); run(p.slow, .15);       // the Solimoes is about three times faster
+    }
+  };
+
+  /* Igapo: trees standing in tea-coloured water, their crowns above it, fish between the trunks, fruit dropping in. */
+  SPECIES.flooded_forest = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 4.2, arrowUp: 1.2,
+    build(B) {
+      const g = G(), r = B.rng(21);
+      g.add(B.cyl({ r1: .44, r2: .47, h: .05, at: [0, .025, 0], segs: 22, shininess: 2, texW: 128, texH: 128, paint(c, W, H) { P.fill(c, '#3b2616'); P.spots(c, { n: 60, color: '#5a3a1c', alpha: .9, r0: .03, r1: .06, stretch: 1.8, seed: 3 }); P.spots(c, { n: 40, color: '#7a5326', alpha: .8, r0: .02, r1: .05, stretch: 1.8, seed: 7 }); } }));
+      const bark = B.mat({ color: '#4a3320', shininess: 3, texW: 64, texH: 128, paint(c, W, H) { P.fill(c, '#4a3320'); c.strokeStyle = 'rgba(25,15,8,.5)'; c.lineWidth = 2; for (let x = 3; x < W; x += 7) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x + 2, H); c.stroke(); } } });
+      const yw = .56, greens = ['#2f6b2a', '#3d7f33', '#28591f'];
+      [[-.23, .06, .045, 1.0], [.05, -.12, .036, .93], [.27, .07, .04, .88]].forEach((q, i) => {
+        g.add(B.cyl({ r1: q[2] * .72, r2: q[2], h: q[3], at: [q[0], q[3] / 2, q[1]], mat: bark, segs: 9 }));
+        for (let k = 0; k < 4; k++) { const a = k * PI / 2 + i * .6; g.add(B.fin({ pts: [[q[2] * .5, .04], [.11, .04], [q[2] * .5, .22]], at: [q[0], 0, q[1]], rot: [0, a, 0], mat: bark })); }   // buttress roots
+        g.add(B.ball({ r: .19, at: [q[0], q[3] + .03, q[1]], scale: [1.25, .72, 1.1], color: greens[i], flat: true, segs: 7, rings: 5, shininess: 4 }));
+        g.add(B.ball({ r: .12, at: [q[0] + (i - 1) * .1 + .06, q[3] - .07, q[1] + .1], scale: [1.2, .7, 1.1], color: greens[(i + 1) % 3], flat: true, segs: 6, rings: 4, shininess: 4 }));
+      });
+      // a low branch with leaves under the water, and a liana
+      g.add(B.tube({ path: [[-.22, .36, .07], [-.3, .42, .12], [-.39, .44, .16]], r: [.014, .01, .005], color: '#4a3320', rad: 5, segs: 6 }));
+      for (let i = 0; i < 5; i++) g.add(B.fin({ pts: [[0, 0], [.03, .016], [.06, 0], [.03, -.016]], smooth: .4, at: [-.28 - i * .028, .41 + i * .008, .11 + i * .012], rot: [r() * 2, r() * 3, r() * 2], color: '#4f9a3c' }));
+      g.add(B.tube({ path: [[.2, .84, .13], [.15, .62, .17], [.18, .4, .15], [.16, .3, .17]], r: .006, color: '#3b5a27', rad: 4, segs: 8 }));
+      // the water surface
+      const water = new THREE.Mesh(new THREE.CircleGeometry(.5, 36), B.mat({ color: '#c98a38', opacity: .42, side: 'double', shininess: 100, specular: '#fff0c8' })); water.rotation.x = -PI / 2; water.position.y = yw; g.add(water);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.5, .01, 6, 40), B.mat({ color: '#f1dfae', emissive: '#6a5020', emissiveIntensity: .4 })); ring.rotation.x = PI / 2; ring.position.y = yw; g.add(ring);
+      // fruit: floating, falling, lying on the bottom
+      const fr = (x, y, z, c, n) => { const b = B.ball({ r: .024, at: [x, y, z], color: c, emissive: c, emissiveIntensity: .25, segs: 8, rings: 6 }); if (n) { b.name = n; b.userData.rigid = true; } g.add(b); return b; };
+      fr(-.02, yw + .008, .24, '#f28c28'); fr(.33, yw + .008, .2, '#8fbf3a'); fr(.02, .3, .2, '#f28c28', 'fruit'); fr(.14, .07, .25, '#f28c28'); fr(-.12, .07, .28, '#8fbf3a');
+      // two fish going round between the trunks
+      const fish = part('fish'); fish.position.set(.02, .3, -.02);
+      [[.2, 0, 0], [.27, 2.6, .07]].forEach(q => { const f = G(); f.add(B.ball({ r: 1, scale: [.055, .032, .012], color: '#c9d0cf', shininess: 80, emissive: '#3a3f3e', emissiveIntensity: .3, segs: 8, rings: 6 })); f.add(B.fin({ pts: [[-.045, 0], [-.085, .03], [-.075, 0], [-.085, -.03]], color: '#e0763a' })); f.add(B.ball({ r: .006, at: [.035, .008, .01], color: '#111111', segs: 5, rings: 4 }));
+        const h = G(); f.position.set(0, q[2], q[0]); h.add(f); h.rotation.y = q[1]; fish.add(h); });
+      g.add(fish);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g), u = (t * .16) % 1;
+      p.fish.rotation.y = t * .45;
+      p.fruit.position.y = u < .12 ? .9 - u / .12 * .34 : Math.max(.07, .56 - (u - .12) / .6 * .49);      // drops from the crown, plops, sinks
+      p.fruit.position.x = .02 + Math.sin(t * 2) * .01 * (u > .12 ? 1 : 0);
+    }
+  };
+
+  /* A river under a river: a slice of the channel. Pale muddy water creeps along the bed under clear dark water. */
+  SPECIES.muddy_underflow = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 4.4, arrowUp: .74, pos: [1, 0, -3.2],
+    build(B) {
+      const g = G(), r = B.rng(8), Dz = .32;
+      g.add(B.box({ size: [1, .05, Dz], at: [0, .025, 0], color: '#6b5a4c', shininess: 2 }));
+      const mudM = B.mat({ color: '#b3915c', shininess: 3, emissive: '#6a5230', emissiveIntensity: .55 });
+      g.add(B.box({ size: [.995, .13, Dz - .01], at: [0, .115, 0], mat: mudM }));
+      const bil = part('bil');
+      for (let i = 0; i < 10; i++) { const b = B.ball({ r: .075 + r() * .035, scale: [1.25, .62, 1], color: i % 3 ? '#b3915c' : '#c4a36c', shininess: 3, emissive: '#6a5230', emissiveIntensity: .55, segs: 9, rings: 6 }); b.userData.x = -.5 + i / 10; b.userData.y = .185 + r() * .02; b.userData.z = (r() - .5) * .12; bil.add(b); }
+      for (let i = 0; i < 4; i++) { const b = B.ball({ r: .04 + r() * .02, color: '#b89a66', opacity: .5, emissive: '#6a5230', emissiveIntensity: .5, segs: 8, rings: 6 }); b.userData.x = -.5 + i / 4 + .1; b.userData.y = .255 + r() * .03; b.userData.z = (r() - .5) * .1; b.userData.curl = 1; bil.add(b); }
+      g.add(bil);
+      // clear dark tea-coloured water above
+      g.add(B.box({ size: [.99, .57, Dz - .012], at: [0, .335, 0], color: '#3a2414', opacity: .5, shininess: 60, emissive: '#2a180c', emissiveIntensity: .6 }));
+      // specks carried along inside the mud
+      { const sp = B.rng(3); for (let i = 0; i < 16; i++) g.add(B.box({ size: [.012, .006, .004], at: [(sp() - .5) * .9, .065 + sp() * .1, Dz / 2 - .004], color: '#8a6d42' })); }
+      const fr = B.mat({ color: '#e2d2ac', shininess: 20, emissive: '#6b5f45', emissiveIntensity: .6 });
+      [1, -1].forEach(sx => [1, -1].forEach(sz => g.add(B.box({ size: [.014, .62, .014], at: [sx * .5, .31, sz * Dz / 2], mat: fr }))));
+      [1, -1].forEach(sz => g.add(B.box({ size: [1.014, .014, .014], at: [0, .62, sz * Dz / 2], mat: fr })));
+      [1, -1].forEach(sx => g.add(B.box({ size: [.014, .014, Dz], at: [sx * .5, .62, 0], mat: fr })));
+      // flow arrows: the muddy layer moves, the dark water hardly does
+      const ar = part('ar'); for (let i = 0; i < 2; i++) { const a = arrow(.2, .1, '#fff3d4', { opacity: .95 }); a.position.set(0, .115, Dz / 2 + .006); a.userData.k = i / 2; ar.add(a); } g.add(ar);
+      return noFog(g);
+    },
+    anim(g, t) {
+      const p = B.parts(g);
+      p.bil.children.forEach(b => { const d = b.userData, x = ((d.x + .5 + t * (d.curl ? .035 : .055)) % 1 + 1) % 1 - .5, e = Math.min(1, (.5 - Math.abs(x)) / .1); b.position.set(x * .9, d.y + (d.curl ? Math.sin(t * .8 + d.x * 9) * .02 : Math.sin(t * 1.3 + d.x * 12) * .008), d.z); b.scale.set((d.curl ? 1.2 : 1.25) * e + .001, (d.curl ? 1 + .3 * Math.sin(t * .8 + d.x * 9) : .62) * e + .001, e + .001); });
+      p.ar.children.forEach(a => { const u = ((t * .22 + a.userData.k) % 1 + 1) % 1; a.position.x = -.48 + u * .76; a.material.opacity = Math.min(1, Math.sin(u * PI) * 2.5) * .95; });
+    }
+  };
+
+  /* The deepest pool: a pit with rock ledges and rippled sand, scoured out where the two currents (dark and pale) collide. */
+  SPECIES.confluence_deep_pool = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 4.8, arrowUp: .95, pos: [0, 0, -3.2],
+    build(B) {
+      const g = G(), r = B.rng(15), em = { emissive: '#2c241d', emissiveIntensity: .7 };
+      const cols = ['#6b5a4c', '#7a6455', '#5c5048', '#84685a'];
+      // rock ledges behind and at the sides, stepping down towards the middle; open towards the viewer
+      [{ R: .43, h: .62, n: 7, s: .15 }, { R: .3, h: .34, n: 6, s: .12 }].forEach((T, ti) => {
+        for (let i = 0; i < T.n; i++) { const a = -.12 + (PI + .24) * i / (T.n - 1), x = Math.cos(a) * T.R, z = -Math.sin(a) * T.R * .62 - .02; const hh = T.h * (.8 + r() * .3) * (.45 + .55 * Math.sin(Math.max(0, Math.min(PI, a))));
+          const m = rock(T.s, cols[(i + ti) % 4], i * 3 + ti * 11 + 2, em); m.scale.set(1, hh * .5 / T.s, .9); m.position.set(x, hh * .46, z); g.add(m); }
+      });
+      // sand in the bottom of the pit, lying in ripples (tipped a little towards the viewer so it can be seen)
+      const sand = G(), sm = { shininess: 2, emissive: '#3d3324', emissiveIntensity: .6 };
+      sand.add(B.ball(Object.assign({ r: 1, scale: [.38, .035, .27], segs: 16, rings: 6, texW: 128, texH: 64, paint(c, W, H) { P.fill(c, '#a08a66'); P.speckle(c, { n: 300, colors: ['#7d6a4c', '#c2ad86'], alpha: .5, size: 2 }); } }, sm)));
+      for (let i = 0; i < 6; i++) { const z = -.15 + i * .062, w = .3 - Math.abs(i - 2.5) * .04; sand.add(B.tube(Object.assign({ path: [[-w, .022, z + .015], [-w * .4, .04, z - .01], [w * .3, .04, z + .014], [w, .022, z - .006]], r: [.005, .016, .016, .005], aspect: [.7, 1.6], color: '#c2ad86', rad: 6, segs: 10 }, sm))); }
+      sand.rotation.x = .34; sand.position.set(0, .1, .13); g.add(sand);
+      // a waterlogged trunk wedged among the rocks
+      g.add(B.cyl({ r1: .02, r2: .028, h: .4, at: [.2, .2, .1], rot: [.2, -.3, -1.05], color: '#3d2a1a', shininess: 2, emissive: '#1c130b', emissiveIntensity: .7, segs: 8 }));
+      g.add(B.cyl({ r1: .007, r2: .012, h: .1, at: [.28, .3, .12], rot: [0, 0, .5], color: '#3d2a1a', shininess: 2, emissive: '#1c130b', emissiveIntensity: .7, segs: 6 }));
+      // the two rivers, dark and pale, run into each other and dig downwards
+      const sw = part('sw');
+      ['#7a4a22', '#d8b57a'].forEach((c, k) => { const d = k ? 1 : -1, m = { color: c, emissive: c, emissiveIntensity: .5, shininess: 10 };
+        sw.add(B.tube(Object.assign({ path: [[d * .52, .86, .1], [d * .32, .85, .1], [d * .13, .76, .1], [d * .055, .6, .1], [d * .05, .47, .1]], r: [.03, .034, .034, .032, .03], rad: 8, segs: 20 }, m)));
+        sw.add(B.cone(Object.assign({ r: .07, h: .13, at: [d * .05, .41, .1], rot: [PI, 0, 0], segs: 10 }, m))); });
+      g.add(sw);
+      // depth mark
+      const pl = plate('', .2, .1, { bg: '#16202a', edge: '#e2d2ac', paint(c, W, H) { c.fillStyle = '#ffe08a'; c.font = '700 ' + Math.round(H * .7) + 'px Arial, Helvetica, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('80', W * .62, H * .55); c.beginPath(); c.moveTo(W * .2, H * .2); c.lineTo(W * .2, H * .62); c.lineTo(W * .11, H * .62); c.lineTo(W * .235, H * .84); c.lineTo(W * .36, H * .62); c.lineTo(W * .27, H * .62); c.lineTo(W * .27, H * .2); c.closePath(); c.fill(); } });
+      pl.position.set(-.36, .12, .33); pl.rotation.x = -.2; g.add(pl);
+      g.add(B.cyl({ r: .008, h: .09, at: [-.36, .04, .325], color: '#8c979f' }));
+      return noFog(g);
+    },
+    anim(g, t) { const sw = B.parts(g).sw, k = (t * .5) % 1; sw.position.y = -.06 * k * k; }
+  };
+
+  /* ================= MARIANA ================= */
+
+  /* The five floors of the ocean: a tall column of five bands, from sunlit turquoise down to the black V of the trench. */
+  SPECIES.ocean_zones = {
+    behave: 'static', zone: 'mid', count: 1, speed: 0, scale: 5, arrowUp: .72,
+    build(B) {
+      const g = G(), W = .3;
+      const bands = [['#3EC6E0', .07, '#1c8aa0', .5], ['#1B4F8F', .13, '#123a6c', .6], ['#0A1630', .3, '#0a1836', .9], ['#05090F', .2, '#060b16', .9]];
+      const white = B.mat({ color: '#ffffff', emissive: '#9aa7b0', emissiveIntensity: .6 });
+      let y = .5; const marks = ['200', '1000', '4000', '6000'];
+      g.add(B.box({ size: [W + .03, .01, W + .03], at: [0, y, 0], mat: white }));
+      bands.forEach((b, i) => {
+        g.add(B.box({ size: [W, b[1], W], at: [0, y - b[1] / 2, 0], color: b[0], shininess: 50, emissive: b[2], emissiveIntensity: b[3] })); y -= b[1];
+        g.add(B.box({ size: [W + .03, .01, W + .03], at: [0, y, 0], mat: white }));
+        g.add(B.box({ size: [.07, .008, .008], at: [W / 2 + .045, y, W / 2], mat: white }));
+        g.add(put(plate(marks[i], i ? .21 : .16, .075, { bg: '#0e2238', fg: '#ffffff', edge: '#7fb8d8', size: .78 }), W / 2 + (i ? .185 : .16), y, W / 2));
+      });
+      // the fifth floor: the trench, a V cut down into the seabed
+      const sh = new THREE.Shape([[-.3, 0], [-.115, 0], [0, -.285], [.115, 0], [.3, 0], [.3, -.3], [-.3, -.3]].map(q => new THREE.Vector2(q[0], q[1])));
+      const bed = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: W, bevelEnabled: false }), B.mat({ color: '#7a6a55', shininess: 3, emissive: '#2e261c', emissiveIntensity: .7 })); bed.position.set(0, y, -W / 2); g.add(bed);
+      const vs = new THREE.Shape([[-.115, 0], [0, -.285], [.115, 0]].map(q => new THREE.Vector2(q[0], q[1])));
+      const vee = new THREE.Mesh(new THREE.ExtrudeGeometry(vs, { depth: W - .012, bevelEnabled: false }), B.mat({ color: '#000000', shininess: 80, emissive: '#02040a', emissiveIntensity: 1 })); vee.position.set(0, y, -W / 2 + .004); g.add(vee);
+      // sun above the top floor, living lights in the dark floors
+      const s = sun(.045, '#ffd24a', 8); s.position.set(0, .6, 0); g.add(s);
+      const tw = part('tw'); [[-.08, .12, '#4FC3FF'], [.07, .02, '#3FE0C5'], [-.04, -.1, '#4FC3FF'], [.09, -.16, '#4FC3FF'], [0, -.33, '#3FE0C5']].forEach(q => tw.add(B.glow({ r: .022, color: q[2], intensity: .9, at: [q[0], q[1], W / 2 + .01] }))); g.add(tw);
+      // our submarine going down the scale
+      const mk = part('mk'); mk.add(B.ball({ r: 1, scale: [.075, .032, .032], color: '#ffc93c', emissive: '#6a4d00', emissiveIntensity: .7, segs: 10, rings: 7 })); mk.add(B.box({ size: [.035, .03, .03], at: [.008, .035, 0], color: '#ffc93c', emissive: '#6a4d00', emissiveIntensity: .7 }));
+      mk.add(B.ball({ r: .018, at: [.06, 0, 0], color: '#9fe6ff', emissive: '#4a90a8', emissiveIntensity: .7, segs: 6, rings: 5 })); mk.add(B.fin({ pts: [[-.06, 0], [-.1, .035], [-.1, -.035]], color: '#f08a24' }));
+      mk.position.set(-W / 2 - .12, .4, W / 2); g.add(mk);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g), u = (t * .07) % 1, k = u < .8 ? u / .8 : 1 - (u - .8) / .2;
+      p.mk.position.y = .47 - k * .9; p.mk.rotation.z = Math.sin(t * 1.3) * .06;
+      p.tw.children.forEach((s, i) => { s.material.opacity = .3 + .6 * Math.max(0, Math.sin(t * 1.7 + i * 2.1)); });
+    }
+  };
+
+  /* Where the light goes: sunshine pours in at the top, the beam thins out on the way down, and at the bottom it is night. */
+  SPECIES.fading_light = {
+    behave: 'static', zone: 'mid', count: 1, speed: 0, scale: 4.2, arrowUp: .7,
+    build(B) {
+      const g = G();
+      const s = sun(.085, '#ffe27a', 12); s.name = 'sun'; s.userData.rigid = true; s.position.set(0, .44, 0); g.add(s);
+      const beamTex = B.canvasTex(64, 256, (c, W, H) => {
+        const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgb(255,240,170)'); gr.addColorStop(.22, 'rgb(120,200,255)'); gr.addColorStop(.5, 'rgb(40,95,190)'); gr.addColorStop(.8, 'rgb(8,22,60)'); gr.addColorStop(1, 'rgb(0,0,0)'); c.fillStyle = gr; c.fillRect(0, 0, W, H);
+        const g2 = c.createLinearGradient(0, 0, W, 0); g2.addColorStop(0, 'rgba(0,0,0,1)'); g2.addColorStop(.5, 'rgba(0,0,0,0)'); g2.addColorStop(1, 'rgba(0,0,0,1)'); c.fillStyle = g2; c.fillRect(0, 0, W, H);
+      });
+      const beams = part('beams');
+      const quad = (wt, wb, y0, y1, ry, rz, op) => { const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute([-wt, y0, 0, wt, y0, 0, -wb, y1, 0, wb, y1, 0], 3)); bg.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 1, 1, 0, 0, 1, 0], 2)); bg.setIndex([0, 2, 1, 1, 2, 3]);
+        const m = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ map: beamTex, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); m.rotation.set(0, ry, rz); m.position.y = .4; beams.add(m); };
+      quad(.07, .3, 0, -.78, 0, 0, .75); quad(.07, .3, 0, -.78, PI / 2, 0, .75);
+      [-.3, -.12, .1, .27].forEach((a, i) => quad(.012, .03, -.02, -.5 - (i % 2) * .16, 0, a, .8));
+      g.add(beams);
+      // three marks down the beam: bright, dim, dark
+      [[.1, '#bfe6ff', '#5fb4f0', .8, .05], [-.14, '#4f86c8', '#1f4f9a', .7, .042]].forEach(q => g.add(B.ball({ r: q[4], at: [0, q[0], 0], color: q[1], emissive: q[2], emissiveIntensity: q[3], segs: 12, rings: 8 })));
+      // night at the bottom: a dark ball with a moon and stars on it
+      g.add(B.ball({ r: .12, at: [0, -.43, 0], color: '#0B1633', shininess: 40, emissive: '#101d4a', emissiveIntensity: .9, segs: 16, rings: 12 }));
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(.125, .008, 6, 30), B.mat({ color: '#5f79c4', emissive: '#3a53a0', emissiveIntensity: .9 })); rim.position.set(0, -.43, 0); g.add(rim);
+      const mo = []; for (let i = 0; i <= 12; i++) { const a = -PI / 2 + i / 12 * PI; mo.push([Math.cos(a) * .05, Math.sin(a) * .05]); } for (let i = 12; i >= 0; i--) { const a = -PI / 2 + i / 12 * PI; mo.push([Math.cos(a) * .028 - .01, Math.sin(a) * .05]); }
+      g.add(B.fin({ pts: mo, at: [.015, -.42, .122], rot: [0, 0, -.4], color: '#fff3c4', basic: true }));
+      const st = part('stars'); [[-.06, -.38], [-.045, -.47], [.07, -.49]].forEach(q => st.add(B.glow({ r: .016, color: '#ffffff', intensity: .9, at: [q[0], q[1], .115] }))); g.add(st);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g); p.sun.rotation.z = t * .25; p.beams.rotation.z = Math.sin(t * .5) * .04;
+      p.beams.children.forEach((m, i) => { if (i > 1) m.material.opacity = .45 + .4 * Math.sin(t * .9 + i * 1.7); });
+      p.stars.children.forEach((s, i) => { s.material.opacity = .45 + .45 * Math.sin(t * 2.2 + i * 1.9); });
+    }
+  };
+
+  /* Living light: a deep-sea jelly outlined in its own blue lights, in a cloud of blinking blue and blue-green sparks. */
+  SPECIES.bioluminescence = {
+    behave: 'static', zone: 'mid', count: 1, speed: 0, scale: 3.8, glows: true, upright: true, arrowUp: .62,
+    build(B) {
+      const g = G(), r = B.rng(31), BL = '#4FC3FF', TE = '#3FE0C5';
+      const jel = part('jel'); jel.position.y = .1;
+      const bell = B.lathe({ profile: [[0, .17], [.09, .16], [.16, .11], [.2, .03], [.2, -.03], [.17, -.05]], smooth: true, segs: 20, name: 'bell', color: '#2a78c8', opacity: .3, shininess: 90, specular: '#bfe9ff', emissive: '#1d6fd0', emissiveIntensity: .9 });
+      bell.userData.rigid = true; jel.add(bell);
+      const li = part('li');
+      const dot = (x, y, z, rad, c, f, mode) => { const s = B.glow({ r: rad, color: c, intensity: .9, at: [x, y, z] }); s.userData.f = f; s.userData.ph = r() * 6.28; s.userData.mode = mode || 0; li.add(s); return s; };
+      for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; dot(Math.cos(a) * .2, -.02, Math.sin(a) * .2, .028, BL, 1.6, 2).userData.ph = i * .52; }                // rim lights run round the bell
+      for (let i = 0; i < 6; i++) { const a = i / 6 * PI * 2 + .3; for (let k = 1; k <= 5; k++) { const R = .15 + .035 * Math.sin(k * 1.1); const s = dot(Math.cos(a) * R, -.03 - k * .075, Math.sin(a) * R, .024 - k * .002, k % 2 ? TE : BL, 1.2, 2); s.userData.ph = -k * .7 + i; s.userData.k = k; s.userData.bx = s.position.x; s.userData.i = i; } }
+      dot(0, .06, 0, .07, BL, .8, 0);
+      jel.add(li); g.add(jel);
+      // free sparks all around: some blink in rhythm, some flare and fade
+      const sp = part('sp');
+      for (let i = 0; i < 26; i++) { const a = r() * 6.28, R = .28 + r() * .24, y = (r() - .5) * .9; const s = B.glow({ r: .014 + r() * .018, color: r() < .55 ? BL : TE, intensity: .9, at: [Math.cos(a) * R, y, Math.sin(a) * R * .7] }); s.userData.f = .6 + r() * 1.8; s.userData.ph = r() * 6.28; s.userData.mode = i % 3 ? 1 : 0; s.userData.y = y; sp.add(s); }
+      g.add(sp);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g), k = Math.max(0, Math.sin(t * 1.8));
+      p.bell.scale.set(1 - .08 * k, 1 + .16 * k, 1 - .08 * k); p.jel.position.y = .1 + Math.sin(t * .9) * .03;
+      const tw = s => { const d = s.userData, w = Math.sin(t * d.f + d.ph); s.material.opacity = d.mode === 1 ? Math.pow(Math.max(0, w), 5) : d.mode === 2 ? .35 + .6 * Math.max(0, w) : .5 + .4 * w; };
+      p.li.children.forEach(s => { tw(s); const d = s.userData; if (d.k) s.position.x = d.bx + Math.sin(t * 1.1 - d.k * .9 + d.i * 1.3) * .008 * d.k; }); p.sp.children.forEach(s => { tw(s); s.position.y = s.userData.y + Math.sin(t * .4 + s.userData.ph) * .03; });
+      p.sp.rotation.y = t * .08;
+    }
+  };
+
+  /* Submarine stop: at the 1000 mark the barrier is down for the submarine; the little bathyscaphe carries on below it. */
+  SPECIES.submarine_limit = {
+    behave: 'static', zone: 'mid', count: 1, speed: 0, scale: 4.6, arrowUp: .56,
+    build(B) {
+      const g = G();
+      g.add(B.cyl({ r: .024, h: .96, at: [0, 0, 0], rot: [0, 0, PI / 2], segs: 10, shininess: 40, emissive: '#555555', emissiveIntensity: .5, texW: 16, texH: 256, paint(c, W, H) { for (let i = 0; i < 12; i++) { c.fillStyle = i % 2 ? '#ffffff' : '#e23b2e'; c.fillRect(0, i * H / 12, W, H / 12 + 1); } } }));
+      const lamps = part('lamps'); [1, -1].forEach(s => { lamps.add(B.ball({ r: .034, at: [s * .49, 0, 0], color: '#ff3b30', emissive: '#ff2a20', emissiveIntensity: .9, segs: 10, rings: 8 })); lamps.add(B.glow({ r: .1, color: '#ff3b30', intensity: .7, at: [s * .49, 0, .02] })); }); g.add(lamps);
+      g.add(B.box({ size: [.3, .115, .03], at: [0, 0, .03], color: '#10202e', emissive: '#0a141c', emissiveIntensity: .6 }));
+      g.add(put(plate('1000', .28, .1, { bg: '#10202e', edge: '#ffffff', fg: '#ffd84a', size: .8, dim: 1 }), 0, 0, .0465));
+      const sub = miniSub(.62); sub.position.set(-.04, .2, 0); sub.name = 'sub'; sub.userData.rigid = true; g.add(sub);
+      const ba = miniBathy(.3); ba.name = 'bathy'; ba.userData.rigid = true; ba.position.set(.02, -.26, .03); g.add(ba);
+      const dn = part('dn'); [0, 1].forEach(i => { const a = arrow(.1, .1, '#7df59a', { rot: [0, 0, -PI / 2], opacity: .95 }); a.position.set(.3, -.2 - i * .12, .03); dn.add(a); }); g.add(dn);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g), u = (t * .16) % 1, k = u < .7 ? u / .7 : 1 - (u - .7) / .3;
+      p.bathy.position.y = -.22 - k * .1; p.sub.position.y = .2 + Math.sin(t * .8) * .008;
+      p.dn.children.forEach((a, i) => { a.material.opacity = .25 + .7 * Math.max(0, Math.sin(t * 3 - i * 1.4)); });
+      p.lamps.children.forEach(m => { if (m.isSprite) m.material.opacity = (t % 1.6) < .8 ? .75 : .2; });
+    }
+  };
+
+  /* Marine snow: soft pale flakes sinking slowly out of the dark and piling up on the bottom. */
+  SPECIES.marine_snow = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 4, arrowUp: 1.16,
+    build(B) {
+      const g = G(), r = B.rng(44);
+      // the soft bottom, with a drift of settled snow on it
+      g.add(B.ball({ r: 1, scale: [.44, .04, .28], at: [0, .004, 0], color: '#8f887b', shininess: 2, specular: '#000000', emissive: '#2a2824', emissiveIntensity: .5, segs: 22, rings: 8 }));
+      [[-.1, .03, .02, .2, .05, .14], [.1, .03, .0, .2, .045, .15], [0, .04, .04, .17, .055, .12], [-.22, .02, .03, .1, .03, .08], [.24, .02, .05, .09, .03, .07]].forEach(q => g.add(B.ball({ r: 1, scale: [q[3], q[4], q[5]], at: [q[0], q[1], q[2]], color: '#E8ECEF', shininess: 4, emissive: '#6d7175', emissiveIntensity: .55, segs: 14, rings: 8 })));
+      const tuft = kind => B.canvasTex(64, 64, (c, W, H) => {
+        const q = B.rng(5 + kind * 4); c.clearRect(0, 0, W, H);
+        const blob = (x, y, rad, a) => { const gr = c.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, 'rgba(255,255,255,' + a + ')'); gr.addColorStop(.55, 'rgba(255,255,255,' + a * .7 + ')'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, W, H); };
+        if (kind === 0) for (let i = 0; i < 7; i++) blob(32 + (q() - .5) * 18, 32 + (q() - .5) * 18, 8 + q() * 8, .9);
+        else if (kind === 1) for (let i = 0; i < 12; i++) { const a = q() * 6.28, d = q() * 17; blob(32 + Math.cos(a) * d, 32 + Math.sin(a) * d * .8, 5 + q() * 7, .9); }      // a ragged clump
+        else { for (let i = 0; i < 9; i++) blob(14 + i * 4.5 + (q() - .5) * 4, 40 - i * 2 + Math.sin(i * 1.3) * 5, 4.5 + q() * 3, .85); }                                       // a short thread
+      });
+      const tex = [tuft(0), tuft(1), tuft(2)];
+      const fl = part('fl');
+      for (let i = 0; i < 38; i++) {
+        const kind = i % 5 === 0 ? 1 : i % 7 === 3 ? 2 : 0, s = kind === 1 ? .1 + r() * .05 : kind === 2 ? .09 + r() * .03 : .04 + r() * .04;
+        const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex[kind], color: new THREE.Color('#e3e8ec'), transparent: true, opacity: .9, depthWrite: false, rotation: r() * 6.28 }));
+        m.scale.set(s, s, s); m.userData.x = (r() - .5) * .7; m.userData.z = (r() - .5) * .34; m.userData.k = r(); m.userData.v = (kind === 1 ? .05 : .034) + r() * .014; m.userData.ph = r() * 6.28; fl.add(m);
+      }
+      g.add(fl);
+      // flakes that have already landed
+      for (let i = 0; i < 8; i++) { const a = r() * 6.28, R = r() * .24; const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex[i % 2], color: new THREE.Color('#eef1f3'), transparent: true, opacity: .95, depthWrite: false, rotation: r() * 6 })); m.scale.setScalar(.07 + r() * .04); m.position.set(Math.cos(a) * R, .085 - R * .1, Math.sin(a) * R * .6 + .06); g.add(m); }
+      return g;
+    },
+    anim(g, t) {
+      B.parts(g).fl.children.forEach(m => { const d = m.userData, u = ((d.k - t * d.v) % 1 + 1) % 1, y = .09 + u * 1.0;
+        m.position.set(d.x * (.6 + .4 * u) + Math.sin(t * .7 + d.ph) * .03, y, d.z); m.material.opacity = .9 * Math.min(1, (1.09 - y) / .12, (y - .07) / .05); m.material.rotation = d.ph + Math.sin(t * .5 + d.ph) * .4; });
+    }
+  };
+
+  /* Water pressure: a gauge deep in the red, squeezed from the sides, with an elephant's weight on top (the card's own comparison). */
+  SPECIES.water_pressure = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 4, arrowUp: 1.2,
+    build(B) {
+      const g = G(), cy = .52, R = .3;
+      const steel = B.mat({ color: '#5d6870', shininess: 60, specular: '#cfe0ea', emissive: '#1f272d', emissiveIntensity: .7 });
+      g.add(B.cyl({ r1: .09, r2: .14, h: .04, at: [0, .02, 0], mat: steel, segs: 14 })); g.add(B.cyl({ r: .035, h: .22, at: [0, .13, 0], mat: steel, segs: 10 }));
+      g.add(B.cyl({ r: R, h: .09, at: [0, cy, 0], rot: [PI / 2, 0, 0], mat: steel, segs: 36 }));
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(R, .025, 8, 40), B.mat({ color: '#d9b45a', shininess: 90, specular: '#fff3c4', emissive: '#5a4516', emissiveIntensity: .6 })); rim.position.set(0, cy, .045); g.add(rim);
+      const face = new THREE.Mesh(new THREE.CircleGeometry(R - .02, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(.86, .86, .86), map: B.canvasTex(256, 256, (c, W, H) => {
+        c.fillStyle = '#f4f1e6'; c.fillRect(0, 0, W, H); const cx = W / 2, cy = H / 2, a0 = PI * .75, sw = PI * 1.5;
+        [['#3CCB6C', 0, .36], ['#F2C230', .36, .66], ['#E5484D', .66, 1]].forEach(q => { c.strokeStyle = q[0]; c.lineWidth = 30; c.beginPath(); c.arc(cx, cy, 92, a0 + sw * q[1], a0 + sw * q[2]); c.stroke(); });
+        c.strokeStyle = '#27313a'; for (let i = 0; i <= 20; i++) { const a = a0 + sw * i / 20, l = i % 5 ? 10 : 22; c.lineWidth = i % 5 ? 3 : 6; c.beginPath(); c.moveTo(cx + Math.cos(a) * 110, cy + Math.sin(a) * 110); c.lineTo(cx + Math.cos(a) * (110 - l), cy + Math.sin(a) * (110 - l)); c.stroke(); }
+        c.fillStyle = '#27313a'; c.font = '700 30px Arial, Helvetica, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('0', cx - 44, cy + 62); c.fillText('1000', cx + 34, cy + 92);
+      }) }));
+      face.position.set(0, cy, .047); g.add(face);
+      const nd = part('needle'); nd.position.set(0, cy, .055);
+      nd.add(B.fin({ pts: [[-.05, .012], [.2, .004], [.2, -.004], [-.05, -.012]], color: '#b3201c', basic: true })); nd.add(B.cyl({ r: .028, h: .02, rot: [PI / 2, 0, 0], color: '#27313a', segs: 14 })); g.add(nd);
+      // the water squeezing in from both sides
+      [1, -1].forEach(s => { const a = part(s > 0 ? 'aR' : 'aL'); const m = arrow(.17, .16, '#9fe0ff', {}); if (s > 0) m.rotation.z = PI; a.add(m); a.position.set(s * .53, cy, .03); a.userData.x = s * .53; g.add(a); });
+      // "an elephant standing on your thumb"
+      const e = part('el'), skin = B.mat({ color: '#8E959C', shininess: 8, emissive: '#2c3034', emissiveIntensity: .7 }), dk = B.mat({ color: '#777e85', shininess: 8, emissive: '#25292c', emissiveIntensity: .7 });
+      e.add(B.ball({ r: .1, scale: [1.3, .95, .85], at: [-.01, .14, 0], mat: skin, segs: 14, rings: 10 }));
+      e.add(B.ball({ r: .068, scale: [1, 1.05, .9], at: [.14, .175, 0], mat: skin, segs: 12, rings: 9 }));
+      [1, -1].forEach(s => { e.add(B.ball({ r: .07, scale: [.6, 1, .22], at: [.095, .18, s * .065], rot: [0, s * .5, 0], mat: dk, segs: 10, rings: 7 }));
+        e.add(B.cyl({ r: .03, h: .1, at: [.075, .05, s * .045], mat: skin, segs: 9 })); e.add(B.cyl({ r: .03, h: .1, at: [-.085, .05, s * .045], mat: skin, segs: 9 }));
+        e.add(B.cone({ r: .009, h: .05, at: [.19, .125, s * .03], rot: [0, 0, -2.1], color: '#f5f0e0', segs: 6 })); e.add(B.ball({ r: .009, at: [.175, .2, s * .05], color: '#111111', segs: 6, rings: 5 })); });
+      e.add(B.tube({ path: [[.19, .17, 0], [.235, .12, 0], [.235, .05, 0], [.26, .02, 0]], r: [.03, .024, .017, .013], mat: skin, rad: 7, segs: 10 }));
+      e.add(B.tube({ path: [[-.13, .17, 0], [-.165, .12, 0], [-.16, .07, 0]], r: .006, mat: dk, rad: 4, segs: 5 }));
+      e.position.set(-.02, cy + R + .018, 0); g.add(e);
+      return g;
+    },
+    anim(g, t) {
+      const p = B.parts(g), f = .86 + .07 * Math.sin(t * .5) + .008 * Math.sin(t * 17);
+      p.needle.rotation.z = PI * 1.25 - f * PI * 1.5;
+      const k = Math.max(0, Math.sin(t * 2.2)); p.aL.position.x = p.aL.userData.x + k * .05; p.aR.position.x = p.aR.userData.x - k * .05;
+      p.el.position.y = .52 + .3 + .018 - k * .006;
+    }
+  };
+
+  /* Challenger Deep: the three craft that carried people here, as models on plinths with their years. */
+  SPECIES.challenger_deep = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 6, arrowUp: .56,
+    build(B) {
+      const g = G(), em = { emissive: '#5c5c5c', emissiveIntensity: .8 };
+      g.add(mud(.6, .3));
+      const rod = (x, y0, y1, z) => g.add(B.cyl({ r: .006, h: y1 - y0, at: [x, (y0 + y1) / 2, z || 0], color: '#8c979f', emissive: '#2c3a44', emissiveIntensity: .5, segs: 6 }));
+      // 1960: bathyscaphe Trieste - a long float with a small crew ball slung underneath
+      g.add(plinth(-.35, 0, .26, '1960'));
+      { const t = G(); t.add(B.body({ len: .31, segs: 16, rad: 12, stations: [[0, .02, .02, .02], [.04, .07, .07, .07], [.14, .095, .095, .095], [.86, .095, .095, .095], [.96, .07, .07, .07], [1, .02, .02, .02]], shininess: 50, emissive: '#5c5c5c', emissiveIntensity: .8,
+          paint(c, W, H) { P.fill(c, '#EDEDED'); c.fillStyle = '#b9bfc4'; c.fillRect(0, H * .72, W, H * .28); c.strokeStyle = 'rgba(60,70,80,.35)'; c.lineWidth = 2; [.2, .35, .5, .65, .8].forEach(x => { c.beginPath(); c.moveTo(x * W, 0); c.lineTo(x * W, H); c.stroke(); }); } }));
+        t.add(B.cyl({ r: .013, h: .035, at: [.02, .04, 0], color: '#EDEDED', emissive: '#5c5c5c', emissiveIntensity: .8, segs: 8 }));
+        t.add(B.box({ size: [.2, .008, .012], at: [0, -.032, 0], color: '#8c979f' }));
+        t.add(B.ball({ r: .04, at: [.02, -.066, 0], color: '#aab4bb', shininess: 80, specular: '#ffffff', emissive: '#2c3a44', emissiveIntensity: .6, segs: 12, rings: 9 }));
+        t.add(B.cyl({ r: .012, h: .012, at: [.058, -.07, 0], rot: [0, 0, PI / 2], color: '#12324a', emissive: '#ffe9a0', emissiveIntensity: .9, segs: 8 }));
+        [-.075, .1].forEach(x => t.add(B.cone({ r: .014, h: .03, at: [x, -.044, 0], rot: [PI, 0, 0], color: '#8c979f', segs: 7 })));
+        t.position.set(-.35, .215, 0); g.add(t); rod(-.39, .1, .19); rod(-.3, .1, .19); }
+      // 2012: Deepsea Challenger - a tall, slim, upright lime-green craft with the pilot's ball at the bottom
+      g.add(plinth(0, 0, .2, '2012'));
+      { const t = G(); t.add(B.body({ len: .32, segs: 14, rad: 12, sq: 3.2, stations: [[0, .04, .04, .03], [.05, .12, .12, .075], [.75, .12, .12, .075], [.9, .1, .1, .07], [1, .05, .05, .04]], rot: [0, 0, PI / 2], shininess: 40, emissive: '#587a14', emissiveIntensity: .8,
+          paint(c, W, H) { P.fill(c, '#A4D233'); c.fillStyle = '#8fbb22'; c.fillRect(W * .1, 0, W * .012, H); c.fillRect(W * .5, 0, W * .012, H); c.fillStyle = '#2b3138'; c.fillRect(W * .86, 0, W * .14, H); } }));
+        t.add(B.ball({ r: .03, at: [0, -.125, .02], color: '#c9d2d8', shininess: 90, specular: '#ffffff', emissive: '#2c3a44', emissiveIntensity: .6, segs: 12, rings: 9 }));
+        t.add(B.cyl({ r: .011, h: .01, at: [0, -.125, .05], rot: [PI / 2, 0, 0], color: '#12324a', emissive: '#ffe9a0', emissiveIntensity: .9, segs: 8 }));
+        t.add(B.box({ size: [.05, .09, .006], at: [0, .04, .027], color: '#f4f6f0', emissive: '#fff6c8', emissiveIntensity: .55 }));      // the tall light panel
+        t.add(B.tube({ path: [[.03, .1, .02], [.07, .12, .04], [.085, .09, .05]], r: .004, color: '#55616b', rad: 4, segs: 5 })); t.add(B.glow({ r: .03, color: '#fff2a8', intensity: .7, at: [.085, .085, .05] }));
+        t.position.set(0, .27, 0); g.add(t); }
+      // 2019: Limiting Factor - a boxy white craft like a suitcase
+      g.add(plinth(.35, 0, .26, '2019'));
+      { const t = G(); t.add(B.body({ len: .23, segs: 12, rad: 14, sq: 4.2, stations: [[0, .12, .12, .1], [.05, .27, .27, .2], [.95, .27, .27, .2], [1, .12, .12, .1]], shininess: 60, emissive: '#5c5c5c', emissiveIntensity: .8,
+          paint(c, W, H) { P.fill(c, '#F3F3F0'); c.strokeStyle = 'rgba(60,70,80,.4)'; c.lineWidth = 2; c.strokeRect(W * .08, H * .1, W * .84, H * .5); c.fillStyle = '#2b3138'; c.fillRect(0, H * .84, W, H * .16); } }));
+        [[.07, -.03, .047], [-.01, -.03, .047], [.117, -.02, 0]].forEach((q, i) => t.add(B.ball({ r: .014, at: q, color: '#12324a', emissive: '#ffe9a0', emissiveIntensity: .8, shininess: 120, segs: 8, rings: 6 })));
+        t.add(B.cyl({ r: .018, h: .012, at: [.02, .066, 0], color: '#8c979f', segs: 10 }));
+        [1, -1].forEach(s => { t.add(B.cyl({ r: .013, h: .03, at: [-.08, .07, s * .025], rot: [0, 0, PI / 2], color: '#55616b', segs: 8 })); t.add(B.box({ size: [.19, .008, .008], at: [0, -.068, s * .03], color: '#55616b' })); });
+        t.position.set(.35, .175, 0); g.add(t); }
+      return g;
+    }
+  };
+
+  /* Vityaz (1957), the white research ship that sounded the trench, and Vityaz-D (2020), the Russian robot that reached its floor. */
+  SPECIES.vityaz = {
+    behave: 'static', zone: 'floor', count: 1, speed: 0, scale: 6, arrowUp: .52,
+    build(B) {
+      const g = G(), W0 = { emissive: '#5c5c5c', emissiveIntensity: .8 };
+      g.add(mud(.62, .3));
+      // --- the ship model on its stand ---
+      g.add(plinth(-.22, -.02, .4, '1957', .08));
+      const s = G(), wh = B.mat({ color: '#F4F4F2', shininess: 30, emissive: '#5c5c5c', emissiveIntensity: .8 }), spar = B.mat({ color: '#c9a66b', shininess: 10, emissive: '#3a2f1c', emissiveIntensity: .6 });
+      s.add(B.body({ len: .56, segs: 26, rad: 14, sq: 2.6, stations: [[0, .04, .03, .004], [.04, .036, .05, .03], [.2, .026, .054, .056], [.5, .022, .054, .062], [.85, .024, .05, .056], [.96, .028, .036, .04], [1, .03, .018, .014]], shininess: 40, emissive: '#5c5c5c', emissiveIntensity: .8,
+        paint(c, W, H) { P.fill(c, '#F4F4F2'); c.fillStyle = '#1f2a33'; c.fillRect(0, H * .6, W, H * .04); c.fillStyle = '#8a2f26'; c.fillRect(0, H * .64, W, H * .36); c.fillStyle = '#27313a'; for (let i = 0; i < 16; i++) c.fillRect(W * (.14 + i * .045), H * .44, 3, 3); } }));
+      s.add(B.box({ size: [.21, .034, .078], at: [0, .028, 0], mat: wh })); s.add(B.box({ size: [.14, .028, .062], at: [.012, .059, 0], mat: wh }));
+      s.add(B.box({ size: [.142, .009, .064], at: [.012, .062, 0], color: '#27313a', emissive: '#ffe9a0', emissiveIntensity: .35 }));
+      s.add(B.box({ size: [.055, .022, .066], at: [.06, .084, 0], mat: wh })); s.add(B.box({ size: [.057, .008, .068], at: [.06, .087, 0], color: '#27313a', emissive: '#ffe9a0', emissiveIntensity: .35 }));
+      s.add(B.cyl({ r: .021, h: .075, at: [-.03, .105, 0], scale: [1.15, 1, .85], color: '#D9B45A', shininess: 30, emissive: '#4a3b18', emissiveIntensity: .6, segs: 12 }));
+      s.add(B.cyl({ r: .0215, h: .017, at: [-.03, .122, 0], scale: [1.15, 1, .85], color: '#c8281e', emissive: '#5a0f0a', emissiveIntensity: .6, segs: 12 }));
+      s.add(B.cyl({ r: .0215, h: .008, at: [-.03, .141, 0], scale: [1.15, 1, .85], color: '#1f2a33', segs: 12 }));
+      [[.165, .2], [-.17, .18]].forEach((q, i) => { s.add(B.cyl({ r1: .0025, r2: .0045, h: q[1], at: [q[0], .012 + q[1] / 2, 0], mat: spar, segs: 6 })); s.add(B.box({ size: [.004, .004, .05], at: [q[0], .012 + q[1] * .78, 0], mat: spar }));
+        [1, -1].forEach(d => s.add(B.cyl({ r: .0028, h: .12, at: [q[0] + d * .047, .07, 0], rot: [0, 0, -d * .9], mat: spar, segs: 5 }))); });
+      [.2, -.21].forEach(x => s.add(B.box({ size: [.05, .014, .04], at: [x, .019, 0], mat: wh })));
+      [1, -1].forEach(d => s.add(B.ball({ r: 1, scale: [.03, .009, .011], at: [-.1, .05, d * .043], mat: wh, segs: 8, rings: 5 })));      // lifeboats
+      s.position.set(-.22, .215, -.02); g.add(s);
+      [-.36, -.08].forEach(x => g.add(B.cyl({ r1: .006, r2: .012, h: .11, at: [x, .13, -.02], color: '#d9b45a', emissive: '#4a3b18', emissiveIntensity: .6, segs: 6 })));
+      // --- the robot Vityaz-D, hovering just above the mud ---
+      const bot = part('bot');
+      bot.add(B.body({ len: .42, segs: 20, rad: 14, stations: [[0, .03, .03, .03], [.04, .085, .085, .085], [.16, .114, .114, .114], [.74, .114, .114, .114], [.9, .075, .075, .075], [1, .03, .03, .03]], shininess: 60, emissive: '#8a3210', emissiveIntensity: .8,
+        paint(c, W, H) { P.fill(c, '#ffffff'); c.fillStyle = '#E8501E'; c.fillRect(0, 0, W, H * .52); c.fillStyle = '#2b3138'; c.fillRect(W * .93, 0, W * .07, H); c.strokeStyle = 'rgba(80,25,5,.4)'; c.lineWidth = 2; [.2, .45, .7].forEach(x => { c.beginPath(); c.moveTo(x * W, 0); c.lineTo(x * W, H); c.stroke(); }); } }));
+      bot.add(B.ball({ r: .016, at: [.2, 0, 0], color: '#0c1116', shininess: 120, specular: '#ffffff', segs: 8, rings: 6 }));
+      [1, -1].forEach(d => { bot.add(B.ball({ r: .009, at: [.19, .012, d * .022], color: '#fff6c8', emissive: '#fff2a8', emissiveIntensity: 1, segs: 6, rings: 5 })); bot.add(B.glow({ r: .04, color: '#fff2a8', intensity: .6, at: [.2, .012, d * .024] }));
+        const tr = new THREE.Mesh(new THREE.TorusGeometry(.017, .006, 6, 12), B.mat({ color: '#15191d', shininess: 30 })); tr.rotation.x = PI / 2; tr.position.set(-.05, 0, d * .058); bot.add(tr); });
+      const tr = new THREE.Mesh(new THREE.TorusGeometry(.03, .007, 6, 16), B.mat({ color: '#15191d', shininess: 30 })); tr.rotation.y = PI / 2; tr.position.x = -.205; bot.add(tr);
+      bot.add(B.fin({ pts: [[0, 0], [-.03, .03], [-.05, .03], [-.045, 0]], at: [-.15, .04, 0], color: '#E8501E' })); bot.add(B.cyl({ r: .003, h: .05, at: [.04, .07, 0], color: '#27313a', segs: 5 }));
+      bot.position.set(.29, .2, .05); g.add(bot);
+      { const pl = put(plate('2020', .15, .058, { bg: '#1b232b', edge: '#d9b45a', fg: '#ffd978', size: .74 }), .3, .045, .22); pl.rotation.x = -.5; g.add(pl); }
+      g.add(B.box({ size: [.17, .012, .06], at: [.3, .012, .21], color: '#3a4046' }));
+      // the pennant left on the bottom: white, blue, red
+      g.add(B.cyl({ r: .004, h: .2, at: [.06, .1, .2], color: '#c9d2d8', emissive: '#3a4046', emissiveIntensity: .6, segs: 6 }));
+      const fl = new THREE.Mesh(new THREE.PlaneGeometry(.1, .066), new THREE.MeshBasicMaterial({ map: B.canvasTex(48, 32, flagPaint), side: THREE.DoubleSide, color: new THREE.Color(.92, .92, .92) })); fl.position.set(.112, .165, .2); g.add(fl);
+      return g;
+    },
+    anim(g, t) { const b = B.parts(g).bot; b.position.y = .2 + Math.sin(t * .9) * .012; b.rotation.z = Math.sin(t * .6) * .03; }
+  };
+})();
+
 /* ===== vehicles, wrecks, phenomena markers and scenery ===== */
 const PROPS = (function () {
   'use strict';
